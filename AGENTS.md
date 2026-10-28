@@ -2,8 +2,11 @@
 
 ## Scope and source of truth
 
-TrueMe is a local CLI for comparing a reference face photo with an edited photo,
-optionally including the original photo before retouching. Read
+TrueMe is a local CLI for comparing two face photos: reference (an enrollment
+photo submitted to a face recognition system) and probe (a photo representing
+a real-world camera capture). The MVP accepts --reference and --probe and
+reports their similarity under the selected model. Future batch processing may
+repeat this pairwise operation; it is not identity search. Read
 [the MVP specification](docs/mvp-spec.md) before implementation. That document
 defines the target, not a claim that features already exist.
 

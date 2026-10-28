@@ -7,8 +7,26 @@ the project-initialization stage: there is no installable CLI, selected model,
 dependency lock, or verified inference yet. Implementation and model research
 are subsequent work.
 
-TrueMe compares a user's reference photo with a retouched photo, optionally
-with the original photo. It supports local, consensual one-to-one comparison.
+TrueMe compares two face photos locally with the user's consent:
+
+- reference: a reference or enrollment photo, like one submitted to a face
+  recognition system.
+- probe: a photo representing a real-world camera capture to compare with
+  the reference. The MVP accepts an image file; live camera capture is not
+  required.
+
+The purpose is to assess facial similarity between enrollment and camera
+conditions. The output describes similarity under the selected model, not
+general image resemblance or retouching intensity. There is no three-photo
+before-and-after workflow. Future batch processing may repeat explicitly
+specified reference/probe pairs; it is outside the initial MVP.
+
+The user's practical question is whether a pair would be accepted in common
+face recognition scenarios. A single model score cannot establish acceptance
+across most real-world systems. Do not present that outcome as a product
+capability without relevant system-specific validation. The MVP reports
+similarity and quality warnings, not a universal pass/fail decision.
+
 Identity search, surveillance, identity databases, and bypassing identity
 verification or liveness detection are outside scope. No GUI, web interface,
 server, cloud API, API key, paid service, or automatic history is required.
@@ -30,8 +48,8 @@ executable is optional and outside the initial MVP.
 Planned commands (not executable in the current repository):
 
 ```powershell
-trueme compare --reference "reference.jpg" --edited "edited.jpg" --device auto
-trueme compare --reference "reference.jpg" --original "original.jpg" --edited "edited.jpg" --output "report.json"
+trueme compare --reference "reference.jpg" --probe "probe.jpg" --device auto
+trueme compare --reference "reference.jpg" --probe "probe.jpg" --output "report.json"
 trueme doctor
 trueme models list
 trueme --help
@@ -68,12 +86,11 @@ Reject zero-norm, non-finite, or dimensionally incompatible vectors. Report
 raw cosine similarity with reasonable precision, without universal thresholds
 or definitive identity judgments. Never fabricate scores when weights are absent.
 
-For reference R, original O, and edited E, report similarity(R, O),
-similarity(R, E), and delta = similarity(R, E) - similarity(R, O).
-A positive delta indicates increased similarity under the model; a negative
-delta indicates decreased similarity. Lighting, pose, quality, and alignment
-can affect scores. Changes do not directly measure retouching intensity or
-aesthetic quality. Two-photo input reports similarity(R, E) only.
+For reference R and probe P, report similarity(R, P). Both inputs are required.
+Use reference and probe consistently in CLI options, internal interfaces,
+reports, tests, and documentation. Lighting, pose, quality, and alignment can
+affect scores. The score is not a confidence percentage, a probability of
+shared identity, or a probability of passing another system's checks.
 
 Warn where feasible about small face regions, possible blur, and severe
 underexposure or overexposure. Label these as heuristics, not calibrated quality
@@ -128,9 +145,8 @@ aliases to the same file. Reports contain:
 - Schema version, timezone-aware timestamp, application version.
 - Model names, versions, and file hashes when available.
 - Requested device, configured providers, and known fallback details.
-- Input basenames only by default.
-- Similarities, optional original score and delta, quality warnings, and
-  interpretation.
+- Input basenames labeled reference and probe, without full paths by default.
+- Reference/probe cosine similarity, quality warnings, and interpretation.
 
 Exclude images, encoded contents, embeddings, and full input paths by default.
 JSON must contain no NaN or infinity. Never modify inputs. Process images and
@@ -142,7 +158,7 @@ analytics, or automatic comparison history. Do not promise secure memory erasure
 
 Automated coverage must include identical and orthogonal nonzero vectors;
 zero, mismatched and non-finite vectors; EXIF orientation; invalid image errors;
-three-photo delta; reports without embeddings or image data; parseable JSON
+required reference/probe arguments; reports without embeddings or image data; parseable JSON
 stdout; missing models; automatic CPU fallback; explicit CUDA failure; and
 report destinations that would overwrite inputs.
 
@@ -159,8 +175,8 @@ test, and package-build instructions once commands exist. Verify packages exclud
 weights and private assets.
 
 The English README must cover purpose and limitations, requirements, CPU/GPU
-setup, model acquisition and licenses, PowerShell examples, two/three-photo
-workflows, device fallback, score interpretation, JSON schema, exit codes,
+setup, model acquisition and licenses, PowerShell examples, reference/probe
+comparison, device fallback, score interpretation, JSON schema, exit codes,
 privacy, development/testing, common errors, and known limitations. Add
 architecture and model-integration documentation with the actual implementation.
 Keep LICENSE, CONTRIBUTING.md, SECURITY.md, and .gitignore consistent with scope.
