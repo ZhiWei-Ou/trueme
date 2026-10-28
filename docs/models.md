@@ -87,9 +87,8 @@ single cosine value predicts a third-party verification decision.
 
 ## Runtime and device behavior
 
-The pinned runtime is ONNX Runtime 1.20.1. CPU setup installs `onnxruntime`;
-GPU setup installs `onnxruntime-gpu` in its place. Never install both into one
-environment. Official [CUDA provider requirements](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#requirements)
+CPU setup pins `onnxruntime==1.20.1`; GPU setup pins `onnxruntime-gpu==1.20.2`.
+Never install both distributions into one environment. Official [CUDA provider requirements](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#requirements)
 list the PyPI 1.20.x GPU build with CUDA 12.x and cuDNN 9.x. cuDNN 8 and 9 are
 not interchangeable. Windows also needs the Visual C++ runtime and CUDA/cuDNN
 DLL directories available to the process. Linux needs corresponding shared

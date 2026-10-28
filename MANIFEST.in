@@ -1,4 +1,4 @@
-include Makefile requirements-lock.txt CONTRIBUTING.md SECURITY.md
+include Makefile requirements-lock.txt requirements-gpu-runtime.txt CONTRIBUTING.md SECURITY.md
 recursive-include scripts *.py
 recursive-include docs *.md
 recursive-include tests *.py
