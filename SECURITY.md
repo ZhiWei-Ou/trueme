@@ -14,6 +14,11 @@ private reporting service is configured here yet; do not assume one exists.
 Until a private channel is available, avoid publishing sensitive exploit
 details or private data. No response-time commitment is made.
 
+`trueme web` listens on 127.0.0.1 by default. Binding another address exposes
+the reference and camera frames to that network without authentication or
+TLS; do so only on networks you trust. The page keeps data in server memory
+only, but the browser and operating system may still cache camera access state.
+
 The application does not provide identity verification, guarantee
 third-party acceptance, or guarantee secure memory erasure. Reports may still
 contain sensitive filenames and scores; users control their storage and sharing.

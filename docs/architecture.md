@@ -27,6 +27,17 @@ require one face, gather quality warnings, align/extract features, then compare.
 explicit export, protecting input paths and aliases. Images and features never
 enter the report schema.
 
+`web/server.py` backs the optional `trueme web` command with the standard
+library HTTP server and packaged static files (`web/static/`). It holds one
+reference feature in memory and compares each posted camera frame with the same
+detector, `embed_single_face`, and cosine similarity used by the CLI; a frame
+without exactly one face returns its face count and no score. Inference is
+serialized by a lock. Requests must use an expected Host header (DNS-rebinding
+protection, relaxed only for wildcard binds) and same-origin `Origin`, upload
+bodies must declare an image type and stay within 15 MB, and responses carry a
+restrictive Content-Security-Policy and `no-store`. Frames and the reference are
+never written to disk or logged; they are discarded when the server stops.
+
 Boundary failures use `errors.py`: invalid input, model, device, processing, and
 report errors are separately actionable. Tests use synthetic images/vectors and
 controlled runtime fixtures; real model checks are separate from the fast suite.

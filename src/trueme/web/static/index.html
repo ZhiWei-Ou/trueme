@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TrueMe Live</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header>
+    <h1>TrueMe Live</h1>
+    <p>Compare your camera with one reference photo, locally on this computer.</p>
+  </header>
+
+  <main>
+    <section class="panel camera">
+      <div class="stage">
+        <video id="video" autoplay playsinline muted></video>
+        <canvas id="overlay"></canvas>
+        <p id="camera-hint" class="hint">Camera is off.</p>
+      </div>
+      <div class="actions">
+        <button id="camera-toggle" type="button">Start camera</button>
+        <span id="camera-status" class="muted"></span>
+      </div>
+    </section>
+
+    <section class="panel side">
+      <h2>Reference</h2>
+      <div class="reference">
+        <img id="reference-preview" alt="Reference photo preview" hidden>
+        <p id="reference-empty" class="muted">No reference yet.</p>
+      </div>
+      <div class="actions">
+        <label class="button">
+          Choose photo
+          <input id="reference-input" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+        </label>
+        <button id="reference-clear" type="button" class="secondary" disabled>Clear</button>
+      </div>
+      <p id="reference-status" class="muted"></p>
+
+      <h2>Similarity</h2>
+      <p id="score" class="score">—</p>
+      <div class="scale" aria-hidden="true">
+        <div class="track">
+          <span class="zone below"></span><span class="zone meets"></span><span class="zone comfortable"></span>
+          <span id="marker" class="marker" hidden></span>
+        </div>
+        <div class="ticks"><span class="tick-reference">0.363</span><span class="tick-comfort">0.5</span></div>
+      </div>
+      <p id="verdict" class="verdict"></p>
+      <ul id="warnings" class="warnings"></ul>
+      <p class="notice">Cosine similarity under SFace, not a confidence percentage, identity
+        verdict, or prediction of door-access or ID-check acceptance. 0.363 is the published
+        SFace/LFW reference; 0.5 is an informal rule of thumb.</p>
+    </section>
+  </main>
+
+  <footer class="muted">
+    Frames and the reference stay in this server's memory and are never saved.
+    Stop the server with Ctrl+C to discard them.
+  </footer>
+</body>
+</html>

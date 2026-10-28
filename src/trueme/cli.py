@@ -99,6 +99,39 @@ def compare(
 
 
 @app.command()
+def web(
+    host: Annotated[str, typer.Option(help="Address to listen on.")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(min=1, max=65535, help="Port to listen on.")] = 8765,
+    model_dir: Annotated[
+        Path | None, typer.Option(help="Directory containing model weights.")
+    ] = None,
+    device: Annotated[str, typer.Option(help="auto, cpu, or cuda.")] = "auto",
+) -> None:
+    """Serve a local page comparing live camera frames with one reference photo."""
+    from trueme.errors import InputError
+    from trueme.models import create_models
+    from trueme.web.server import create_server, is_loopback
+
+    if device not in {"auto", "cpu", "cuda"}:
+        raise InputError("Device must be auto, cpu, or cuda.")
+    bundle = create_models(model_location(model_dir), device)
+    server = create_server(host, port, bundle)
+    if not is_loopback(host):
+        typer.echo(
+            "Warning: listening beyond this computer exposes the reference and camera frames "
+            "to the network, and browsers allow camera access only on localhost or HTTPS.",
+            err=True,
+        )
+    console.print(f"TrueMe Live: {server.url}")
+    console.print("Press Ctrl+C to stop; the reference and frames are discarded on exit.")
+    with server:
+        try:
+            server.serve_forever()
+        except KeyboardInterrupt:
+            pass
+
+
+@app.command()
 def doctor(
     model_dir: Annotated[Path | None, typer.Option()] = None,
     as_json: Annotated[bool, typer.Option("--json")] = False,

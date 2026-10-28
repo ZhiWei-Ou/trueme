@@ -4,6 +4,10 @@
 
 This document records the initial implementation target. The CLI MVP is implemented. See README.md for current commands and
 docs/validation.md for verified behavior and remaining acceptance checks.
+After the MVP, an optional `trueme web` command added a local live-camera page
+for one-to-one comparison; docs/architecture.md describes its boundaries. The
+scope statements below about live capture and web interfaces describe the
+initial MVP only.
 
 TrueMe compares two face photos locally with the user's consent:
 

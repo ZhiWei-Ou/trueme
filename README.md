@@ -37,6 +37,8 @@ verdicts, or predictions of third-party verification acceptance.
   heuristic warnings for small faces, blur, and extreme exposure.
 - **Explicit device control.** CPU or CUDA, with observable automatic CPU fallback
   and strict failure when explicitly requested CUDA cannot run.
+- **Live camera page.** `trueme web` serves a local page that scores your webcam
+  against one reference photo in real time, using the same pipeline.
 - **Scriptable results.** Structured JSON, stable exit codes, environment
   diagnostics, and optional reports protected against overwriting input images.
 
@@ -92,6 +94,23 @@ quality warnings, and an interpretation notice. A higher score means greater
 feature similarity under SFace; TrueMe applies no pass/fail threshold.
 
 ## Usage
+
+### Compare live with your camera
+
+```sh
+.venv/bin/trueme web --model-dir models --device cpu
+```
+
+Open the printed address (default `http://127.0.0.1:8765/`), choose a reference
+photo, then start the camera. The page draws the detected face and updates the
+cosine similarity several times per second against the 0.363 / 0.5 scale above.
+Frames without exactly one face get no score. Use `--host` and `--port` to pick
+the address, for example `--port 9000`. The reference and frames stay in the
+server's memory and are discarded when you press Ctrl+C.
+
+Browsers grant camera access only on `localhost`/`127.0.0.1` or HTTPS, so keep
+the default loopback address. Binding another `--host` prints a warning: it
+exposes the page to that network without authentication or TLS.
 
 ### Inspect the installation
 
@@ -166,8 +185,7 @@ TrueMe's CLI continues to report raw cosine similarity without applying a thresh
 
 ### Input limits and common errors
 
-Run each reference/probe pair independently. Batch processing and live capture
-are outside this MVP. Animated and multi-frame files, including MPO containers
+Run each reference/probe pair independently; batch processing is not supported. Animated and multi-frame files, including MPO containers
 with `.jpg` extensions, are rejected; explicitly export the intended single frame.
 No/multiple-face errors require an input containing exactly one visible face.
 Quality warnings are heuristics; lighting, pose, and alignment can affect scores.
@@ -187,6 +205,8 @@ secure memory erasure.
 | `--device auto\|cpu\|cuda` | Select inference device | `auto` |
 | `--output` | Explicit JSON report destination | No file written |
 | `--overwrite` | Allow replacement of an existing report | Off |
+| `--host` (`web`) | Address the live page listens on | `127.0.0.1` |
+| `--port` (`web`) | Port the live page listens on | `8765` |
 
 Model lookup uses `--model-dir` → `TRUEME_MODEL_DIR` → the
 [platform's per-user directory](docs/installation.md#model-storage). It does not

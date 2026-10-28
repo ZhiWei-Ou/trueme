@@ -79,3 +79,9 @@ def test_installed_resources_outside_project(tmp_path):
     )
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout)["models"]
+
+
+def test_web_requires_models_before_listening(tmp_path):
+    result = run_cli("web", "--model-dir", str(tmp_path), "--port", "1")
+    assert result.returncode == 3
+    assert "docs/models.md" in result.stderr

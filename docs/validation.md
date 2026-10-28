@@ -40,6 +40,19 @@ by the multi-frame input contract. To complete that pair, the user must supply
 an intentionally selected, single-frame JPEG/PNG/WebP export; the original was
 not altered and no frame was silently selected.
 
+## Live web page
+
+On macOS (Apple Silicon), Python 3.11.18, CPU ONNX Runtime 1.20.1, with the
+pinned models and one user-provided photo: `trueme web` served the page; the
+API returned a face box and score for frames and no score for a blank frame;
+a blank reference, non-image body, foreign `Origin`, and foreign Host header
+were rejected; IPv6 loopback, port-in-use errors, and Ctrl+C shutdown behaved
+as documented. Headless Chrome with a fake camera fed from that photo uploaded
+the reference, streamed frames, drew the face box, and showed the score and
+scale. 640-pixel frames took about 43 ms per request (median of 20) on that
+machine. A physical webcam, other browsers, Windows, Linux, and CUDA were not
+exercised for the web page.
+
 ## Device and platform limits
 
 GPU access is blocked inside the execution sandbox, while an elevated query
@@ -66,7 +79,10 @@ presence is not a claim of platform acceptance.
 3. Supply a chosen single-frame export for the rejected MPO probe and compare it.
 4. Exercise JSON output and explicit export, existing-report overwrite, and input
    alias protection through actual workflows.
-5. On compatible NVIDIA hardware, run doctor followed by actual explicit CUDA
+5. Run `trueme web`, choose a reference photo, and start a physical webcam;
+   check the face box, score updates, multiple-face handling, and that stopping
+   the server discards the reference.
+6. On compatible NVIDIA hardware, run doctor followed by actual explicit CUDA
    comparisons; compare CPU/CUDA results with numerical tolerance, not exact
    floating-point equality. Initialization alone does not satisfy this check.
 

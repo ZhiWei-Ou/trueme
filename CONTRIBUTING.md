@@ -2,7 +2,7 @@
 
 TrueMe implements the local pairwise CLI MVP. Read [AGENTS.md](AGENTS.md) and the
 [MVP specification](docs/mvp-spec.md) for scope and acceptance requirements.
-See README.md and docs/installation.md for installation and CLI usage.
+See README.md and docs/installation.md for installation, CLI, and live page usage.
 
 Keep changes focused and preserve unrelated work. Use English for project
 documentation. Original contributions use the repository's MIT license;

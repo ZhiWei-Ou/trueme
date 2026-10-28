@@ -27,6 +27,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "trueme.models" = ["*.json"]
+"trueme.web" = ["static/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -5,7 +5,9 @@
 TrueMe is a local CLI for comparing two face photos: reference (an enrollment
 photo submitted to a face recognition system) and probe (a photo representing
 a real-world camera capture). The MVP accepts --reference and --probe and
-reports their similarity under the selected model. Future batch processing may
+reports their similarity under the selected model. The `trueme web` command
+serves an optional local page that uses live camera frames as the probe against
+one in-memory reference; it is the same one-to-one comparison. Future batch processing may
 repeat this pairwise operation; it is not identity search. Read
 [the MVP specification](docs/mvp-spec.md) before implementation. That document
 defines the target, not a claim that features already exist.
@@ -36,7 +38,10 @@ repository root, read it; do not create or maintain it without authorization.
   platform. Use Makefile as the common development and build entry point;
   pyproject.toml remains the source of Python packaging metadata.
 - Use a src/ package layout, pyproject.toml, Typer, Rich, ONNX Runtime,
-  OpenCV, NumPy, Pillow, and pytest. Remain a pure CLI.
+  OpenCV, NumPy, Pillow, and pytest. Remain a CLI; the only web surface is the
+  foreground `trueme web` page, served by the standard library, holding one
+  reference in memory, and listening on loopback by default. Do not add
+  galleries, frame persistence, or confidence percentages to it.
 - Use a project-local .venv. Never modify global Python packages, global Git
   identity, or system execution policy.
 - Verify dependency compatibility and pin a tested environment. Keep CPU and
