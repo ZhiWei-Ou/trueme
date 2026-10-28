@@ -11,8 +11,8 @@ ROOT = Path(__file__).resolve().parent.parent
 
 
 def setup(device: str) -> None:
-    if sys.version_info[:2] != (3, 11):
-        raise SystemExit("Setup requires Python 3.11; set make PYTHON to its executable.")
+    if not (3, 11) <= sys.version_info[:2] < (3, 14):
+        raise SystemExit("Setup requires Python 3.11-3.13; set make PYTHON to its executable.")
     environment = ROOT / ".venv"
     python = environment / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
     if not python.exists():
@@ -42,11 +42,11 @@ def main() -> None:
     if args.command == "setup":
         setup(args.device)
     else:
-        print("make setup DEVICE=cpu|gpu  Create local Python 3.11 environment")
+        print("make setup DEVICE=cpu|gpu  Create local Python environment")
         print("make test                 Run unit tests (no weights or photos)")
         print("make lint                 Check Python style and errors")
         print("make build                Build wheel and source distribution")
-        print("Set PYTHON to a Python 3.11 executable when running setup.")
+        print("Set PYTHON to a Python 3.11-3.13 executable when running setup.")
 
 
 if __name__ == "__main__":

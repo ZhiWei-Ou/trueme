@@ -1,12 +1,13 @@
 # Installation and development
 
-Use 64-bit Python 3.11 and GNU Make. The application targets Windows, Linux,
+Use 64-bit Python 3.11 or newer (currently up to 3.13, the newest version with
+ONNX Runtime 1.20 wheels) and GNU Make. The application targets Windows, Linux,
 and macOS; actual validation coverage is recorded in the acceptance handoff.
 No virtual-environment activation or PowerShell execution-policy change is needed.
 
 ## Windows (PowerShell)
 
-Install Python 3.11 from python.org with the Python launcher. Install GNU Make
+Install Python 3.11-3.13 from python.org with the Python launcher. Install GNU Make
 (for example, `choco install make` if Chocolatey is already installed), then open
 a new PowerShell with `make` on PATH. Native GNU Make uses the command interpreter;
 the recipes require neither WSL nor Unix utilities. In the repository:
@@ -24,7 +25,7 @@ runtime DLLs. Use the [official ORT installation guidance](https://onnxruntime.a
 
 ## Linux and macOS
 
-Install Python 3.11 and GNU Make through your normal OS tooling. On systems where
+Install Python 3.11-3.13 and GNU Make through your normal OS tooling. On systems where
 GNU Make is named `gmake`, use that name for the commands below.
 
 ```sh
@@ -38,8 +39,8 @@ make build
 Setup creates only the project's `.venv`, installs the editable project and
 pinned development dependencies, and runs `pip check`. `pyproject.toml` defines
 all direct dependencies; `requirements-lock.txt` constrains transitives for the
-tested environment. Other interpreter minor versions are intentionally excluded
-from this MVP. Build produces a wheel and source archive under `dist/`; weights,
+tested environment. Python 3.14 and newer are excluded until the pinned ONNX Runtime
+provides wheels for them. Build produces a wheel and source archive under `dist/`; weights,
 photos, reports, and environments are not packaged. The wheel includes the model
 manifest and loads it via package resources.
 
@@ -92,7 +93,7 @@ the Linux wheel recipe is not a Windows validation claim.
 
 Model downloads are separate explicit steps in [models.md](models.md). Setup,
 unit tests, lint, and builds never download model weights or inspect private photos.
-For installing a built wheel in a fresh local Python 3.11 virtual environment,
+For installing a built wheel in a fresh local Python 3.11-3.13 virtual environment,
 use `python -m pip install 'dist/trueme-0.1.0-py3-none-any.whl[cpu]'` (or `[gpu]`),
 using the new environment's Python executable.
 

@@ -1,4 +1,4 @@
-# Constraints for the Python 3.11 environment. Direct requirements live in pyproject.toml.
+# Constraints for the Python 3.11-3.13 environments. Direct requirements live in pyproject.toml.
 click==8.3.0
 colorama==0.4.6
 coloredlogs==15.0.1

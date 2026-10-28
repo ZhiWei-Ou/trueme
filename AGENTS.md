@@ -32,7 +32,7 @@ repository root, read it; do not create or maintain it without authorization.
 
 ## Implementation conventions
 
-- Target Python 3.11 on Linux, macOS, and Windows, with Windows as the primary
+- Target Python 3.11-3.13 on Linux, macOS, and Windows, with Windows as the primary
   platform. Use Makefile as the common development and build entry point;
   pyproject.toml remains the source of Python packaging metadata.
 - Use a src/ package layout, pyproject.toml, Typer, Rich, ONNX Runtime,
