@@ -3,19 +3,23 @@
 <p align="center">Compare a reference photo and a probe photo locally with a Python CLI.</p>
 
 <p align="center">
-  <a href="pyproject.toml"><img src="https://img.shields.io/badge/Python-3.11-526448" alt="Requires Python 3.11"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-526448" alt="MIT license"></a>
+  <a href="https://github.com/ZhiWei-Ou/trueme/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/ZhiWei-Ou/trueme/ci.yml?branch=main&label=checks" alt="CI status"></a>
+  <a href="pyproject.toml"><img src="https://img.shields.io/badge/python-%E2%89%A53.11-3776AB?logo=python&logoColor=white" alt="Python 3.11 or newer"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/ZhiWei-Ou/trueme" alt="MIT license"></a>
+  <a href="https://github.com/ZhiWei-Ou/trueme/commits/main"><img src="https://img.shields.io/github/last-commit/ZhiWei-Ou/trueme" alt="Last commit"></a>
+  <a href="https://github.com/ZhiWei-Ou/trueme/issues"><img src="https://img.shields.io/github/issues/ZhiWei-Ou/trueme" alt="Open issues"></a>
+  <a href="https://github.com/ZhiWei-Ou/trueme/stargazers"><img src="https://img.shields.io/github/stars/ZhiWei-Ou/trueme?style=flat" alt="GitHub stars"></a>
 </p>
 
 <p align="center">
   <a href="#quick-start">Quick Start</a> ·
-  <a href="#usage">Usage</a> ·
   <a href="#documentation">Documentation</a> ·
+  <a href="https://github.com/ZhiWei-Ou/trueme/issues">Issues</a> ·
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
 <p align="center">
-  <img src="docs/assets/sface-score-guide.svg" alt="SFace scores below or at least 0.363, with rough evaluations relative to the published LFW threshold" width="640">
+  <img src="docs/assets/sface-score-guide.svg" alt="SFace cosine similarity scale: scores below 0.363 are below the published LFW reference; scores at or above it meet the reference" width="640">
 </p>
 
 TrueMe uses YuNet to detect and align faces, then SFace to compare their features.
@@ -38,55 +42,63 @@ verdicts, or predictions of third-party verification acceptance.
 
 ## Quick Start
 
-The recommended first run uses **CPU**. Install 64-bit **Python 3.11**, Git, and
-**GNU Make**, then use PowerShell below. For macOS/Linux shell setup, follow the
-[installation guide](docs/installation.md#linux-and-macos); macOS uses CPU.
-Other Python minor versions are currently excluded by the package requirements.
+The steps below use a Unix shell (Linux or macOS) and the CPU runtime. Windows
+PowerShell and CUDA setup are covered in the [installation guide](docs/installation.md).
 
-```powershell
+**Prerequisites:** Python 3.11 or newer (currently up to 3.13, the newest version
+with ONNX Runtime 1.20 wheels), Git, GNU Make, and `curl`.
+
+### 1. Set up the environment
+
+```sh
 git clone https://github.com/ZhiWei-Ou/trueme.git
 cd trueme
-make setup PYTHON="py -3.11" DEVICE=cpu
+make setup DEVICE=cpu
+.venv/bin/trueme --version
 ```
 
-Setup installs dependencies in the project's `.venv`; activation is unnecessary.
-Download the two pinned models explicitly (weights are not included in Git):
+`make setup` creates a project-local `.venv` and installs pinned dependencies;
+activation is unnecessary. It uses `python3` by default; if that is not 3.11–3.13,
+pass the interpreter explicitly, for example `make setup PYTHON=python3.12 DEVICE=cpu`.
+Use `gmake` where GNU Make has that name.
 
-```powershell
-New-Item -ItemType Directory -Force models | Out-Null
-$revision = "48b10fa505aeb51fbd127fc60a5c660040e823b7"
-$base = "https://media.githubusercontent.com/media/opencv/opencv_zoo/$revision/models"
-Invoke-WebRequest "$base/face_detection_yunet/face_detection_yunet_2023mar.onnx" -OutFile "models/face_detection_yunet_2023mar.onnx"
-Invoke-WebRequest "$base/face_recognition_sface/face_recognition_sface_2021dec.onnx" -OutFile "models/face_recognition_sface_2021dec.onnx"
-.\.venv\Scripts\trueme.exe doctor --model-dir models
+### 2. Download the models
+
+Weights are not included in Git. Fetch the two pinned OpenCV Zoo models:
+
+```sh
+mkdir -p models
+base=https://media.githubusercontent.com/media/opencv/opencv_zoo/48b10fa505aeb51fbd127fc60a5c660040e823b7/models
+curl -fL -o models/face_detection_yunet_2023mar.onnx "$base/face_detection_yunet/face_detection_yunet_2023mar.onnx"
+curl -fL -o models/face_recognition_sface_2021dec.onnx "$base/face_recognition_sface/face_recognition_sface_2021dec.onnx"
+.venv/bin/trueme doctor --model-dir models
 ```
 
-Model sources, licenses, and publisher checksums are in the [model guide](docs/models.md).
-TrueMe verifies both hashes before initialization. In a CPU installation,
-`doctor` reporting unavailable CUDA is expected; CPU initialization should succeed.
+TrueMe verifies both checksums before initialization; sources and licenses are in
+the [model guide](docs/models.md). In a CPU installation, `doctor` reporting
+unavailable CUDA is expected; CPU initialization should succeed.
+
+### 3. Compare two photos
 
 Place two consented, single-frame photos in the project root as `reference.jpg`
-and `probe.jpg`, each containing exactly one face. Then compare:
+and `probe.jpg`, each containing exactly one face:
 
-```powershell
-.\.venv\Scripts\trueme.exe compare --reference reference.jpg --probe probe.jpg --model-dir models --device cpu
+```sh
+.venv/bin/trueme compare --reference reference.jpg --probe probe.jpg --model-dir models --device cpu
 ```
 
 The result includes cosine similarity, model names, configured providers, any
 quality warnings, and an interpretation notice. A higher score means greater
-feature similarity under SFace; there is no universal pass/fail threshold.
-On macOS/Linux, the executable is `.venv/bin/trueme`; `python -m trueme` also works
-when invoked with the virtual environment's Python.
+feature similarity under SFace; TrueMe applies no pass/fail threshold.
 
 ## Usage
 
 ### Inspect the installation
 
-```powershell
-.\.venv\Scripts\trueme.exe --help
-.\.venv\Scripts\trueme.exe --version
-.\.venv\Scripts\trueme.exe models list --json
-.\.venv\Scripts\trueme.exe doctor --model-dir models --json
+```sh
+.venv/bin/trueme --help
+.venv/bin/trueme models list --json
+.venv/bin/trueme doctor --model-dir models --json
 ```
 
 Help, version, and basic diagnostics work without weights. `doctor` distinguishes
@@ -95,8 +107,8 @@ provider enumeration and session initialization from actual inference. Use
 
 ### Export a report
 
-```powershell
-.\.venv\Scripts\trueme.exe compare --reference reference.jpg --probe probe.jpg --model-dir models --json --output result.report.json
+```sh
+.venv/bin/trueme compare --reference reference.jpg --probe probe.jpg --model-dir models --json --output result.report.json
 ```
 
 `--json` writes one JSON object to stdout, including errors; diagnostics go to
@@ -133,20 +145,17 @@ Errors contain `error.type`, `error.message`, and `error.exit_code`.
 The [OpenCV 4.12 SFace tutorial](https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html)
 reports a cosine threshold of **0.363** for LFW. The
 [OpenCV Zoo demo at our pinned revision](https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/sface.py)
-uses the same value. The illustration gives a rough interpretation of a score
-relative to that reference:
+uses the same value. The illustration places a score relative to that reference:
 
 | Cosine score | Rough evaluation |
 | --- | --- |
-| Below 0.363 | Below the reference — camera, let's get acquainted again. |
-| At least 0.363 | Meets the reference — that familiar feeling is back. |
+| Below 0.363 | Below the reference |
+| At least 0.363 | Meets the reference |
 
 "Meets the reference" means reaching the published SFace/LFW threshold, not a
-calibrated TrueMe acceptance decision. Higher values mean greater feature
-similarity under this model, not confidence percentages. The playful captions
-add no measured meaning. This guide does not establish identity, predict door
-access or attendance acceptance, or certify ID-photo compliance. TrueMe's CLI
-continues to report raw cosine similarity without applying a pass/fail threshold.
+calibrated TrueMe acceptance decision. This guide does not establish identity,
+predict door access or attendance acceptance, or certify ID-photo compliance.
+TrueMe's CLI continues to report raw cosine similarity without applying a threshold.
 
 </details>
 
@@ -176,7 +185,8 @@ secure memory erasure.
 
 Model lookup uses `--model-dir` → `TRUEME_MODEL_DIR` → the
 [platform's per-user directory](docs/installation.md#model-storage). It does not
-automatically search the project's `models/` directory.
+automatically search the project's `models/` directory. To skip `--model-dir`
+in the current shell, run `export TRUEME_MODEL_DIR="$PWD/models"`.
 
 `auto` attempts CUDA and reports CPU fallback on unavailability, initialization
 failure, or execution failure. `cuda` fails instead of silently using a CPU-only
@@ -201,7 +211,8 @@ and hosted CI execution are not established by that validation record.
 ## Contributing
 
 Read [CONTRIBUTING.md](CONTRIBUTING.md) for scope, implementation conventions,
-and privacy requirements. After setup, run:
+and privacy requirements. Report bugs or ideas through
+[GitHub Issues](https://github.com/ZhiWei-Ou/trueme/issues). After setup, run:
 
 ```sh
 make test
@@ -209,9 +220,9 @@ make lint
 make build
 ```
 
-Use `gmake` where GNU Make has that name. These targets do not download weights
-or process personal photos. Keep photos, weights, reports, and environments out
-of commits. Builds produce a wheel and source archive under `dist/`.
+These targets do not download weights or process personal photos. Keep photos,
+weights, reports, and environments out of commits. Builds produce a wheel and
+source archive under `dist/`.
 
 ## License
 

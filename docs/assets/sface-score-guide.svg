@@ -1,30 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="880" height="450" viewBox="0 0 880 450" role="img" aria-labelledby="title desc">
-  <title id="title">TrueMe — a score, a rough read</title>
-  <desc id="desc">A rough comparison with the published SFace LFW threshold: below 0.363 is below the reference; at least 0.363 meets the reference. Playful captions do not establish identity, door-access acceptance or ID-photo approval.</desc>
-  <rect width="880" height="450" rx="20" fill="#faf9f5"/>
-  <g font-family="Inter, DejaVu Sans, Arial, sans-serif" fill="#292d29">
-    <text x="60" y="56" font-size="13" letter-spacing="2.5" fill="#626b60">TRUEME / SFACE</text>
-    <text x="60" y="105" font-size="32" font-weight="600">A score, a rough read.</text>
-    <g font-size="12" letter-spacing="1.5" fill="#71766e">
-      <text x="60" y="156">COSINE SCORE</text>
-      <text x="290" y="156">ROUGH READ</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200" role="img" aria-labelledby="title desc">
+  <title id="title">TrueMe — SFace score guide</title>
+  <desc id="desc">A cosine similarity scale with the published SFace LFW reference at 0.363: lower scores are below the reference, higher scores meet it. Benchmark context only, not an identity verdict.</desc>
+  <rect width="800" height="200" rx="20" fill="#faf9f5"/>
+  <g font-family="Inter, DejaVu Sans, Arial, sans-serif">
+    <text x="60" y="56" font-size="13" letter-spacing="2.5" fill="#626b60">SFACE COSINE SIMILARITY</text>
+    <rect x="60" y="96" width="247" height="10" rx="5" fill="#dedfd6"/>
+    <rect x="307" y="96" width="433" height="10" rx="5" fill="#526448"/>
+    <path d="M307 86V116" stroke="#292d29" stroke-width="2"/>
+    <text x="307" y="78" font-size="14" text-anchor="middle" fill="#292d29">0.363</text>
+    <g font-size="20" text-anchor="middle">
+      <text x="183" y="152" fill="#71766e">Below the reference</text>
+      <text x="523" y="152" fill="#526448" font-weight="600">Meets the reference</text>
     </g>
-    <path d="M60 173H820 M60 263H820 M60 353H820" stroke="#dedfd6" stroke-width="1"/>
-    <g font-size="28" font-weight="500" fill="#526448">
-      <text x="60" y="229">&lt; 0.363</text>
-      <text x="60" y="319">≥ 0.363</text>
-    </g>
-    <g font-size="22">
-      <text x="290" y="210">Below the reference.</text>
-      <text x="290" y="300">Meets the reference.</text>
-    </g>
-    <g font-size="16" fill="#656b61">
-      <text x="290" y="239">Camera, let's get acquainted again.</text>
-      <text x="290" y="329">That familiar feeling is back.</text>
-    </g>
-    <a href="https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html">
-      <text x="60" y="387" font-size="14" fill="#526448">Reference: OpenCV SFace / LFW · 0.363</text>
-    </a>
-    <text x="60" y="418" font-size="13" fill="#656b61">Benchmark context only. No identity verdict, door-access or ID-photo approval.</text>
   </g>
 </svg>
