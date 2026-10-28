@@ -226,3 +226,31 @@ __marimo__/
 *.ptx
 *.cubin
 *.fatbin
+
+# TrueMe private inputs and generated reports
+/photos/
+/inputs/
+/reports/
+report.json
+*.report.json
+*.[jJ][pP][gG]
+*.[jJ][pP][eE][gG]
+*.[pP][nN][gG]
+*.[wW][eE][bB][pP]
+
+# Model weights (documentation and manifests may be tracked)
+*.onnx
+*.onnx.data
+*.ort
+*.pth
+*.pt
+*.safetensors
+*.ckpt
+/models/weights/
+
+# Local credentials and agent state
+.env.*
+!.env.example
+/.aws/
+/.agents/
+/.codex/
