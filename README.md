@@ -1,6 +1,6 @@
 <h1 align="center">TrueMe</h1>
 
-<p align="center">Compare a reference photo and a probe photo locally with a Python CLI.</p>
+<p align="center">🪞 Did your retouched photo just stop looking like <em>you</em>?<br>See how a face recognition model sees it, entirely offline.</p>
 
 <p align="center">
   <a href="https://github.com/ZhiWei-Ou/trueme/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/ZhiWei-Ou/trueme/ci.yml?branch=main&label=checks" alt="CI status"></a>
@@ -12,142 +12,164 @@
 </p>
 
 <p align="center">
-  <a href="#quick-start">Quick Start</a> ·
-  <a href="#documentation">Documentation</a> ·
-  <a href="https://github.com/ZhiWei-Ou/trueme/issues">Issues</a> ·
-  <a href="CONTRIBUTING.md">Contributing</a>
+  <a href="#quick-start">🚀 Quick Start</a> ·
+  <a href="#documentation">📚 Documentation</a> ·
+  <a href="https://github.com/ZhiWei-Ou/trueme/issues">🐛 Issues</a> ·
+  <a href="CONTRIBUTING.md">🤝 Contributing</a>
 </p>
 
 <p align="center">
   <img src="docs/assets/sface-score-guide.svg" alt="SFace cosine similarity scale: below 0.363 is below the published LFW reference, 0.363 meets it, and 0.5 or higher is marked as comfortably similar" width="640">
 </p>
 
-TrueMe uses YuNet to detect and align faces, then SFace to compare their features.
-Use your own photos or photos used with explicit consent. Scores describe
-similarity under this model; they are not confidence percentages, identity
-verdicts, or predictions of third-party verification acceptance.
+Smoothed the skin, slimmed the jaw, brightened the eyes ✨, and now the office
+gate stares at you blankly? 🚪🤨
 
-## Features
+Give TrueMe your edited ID, badge, or profile photo and a plain camera shot of
+yourself. It scores how similar the two faces are under the SFace model, so you
+get a rough hint whether everyday face recognition, such as door access or
+check-in kiosks, would still see the same person. 🙂
 
-- **One pair, one score.** Compare an enrollment/reference photo with a probe
-  representing camera conditions; require exactly one face in each image.
-- **Local processing.** No uploads, telemetry, accounts, or automatic history.
-  Inputs remain unchanged; crops and embeddings stay in memory.
-- **Photo handling.** JPEG, PNG, and WebP, Unicode paths, EXIF orientation, and
-  heuristic warnings for small faces, blur, and extreme exposure.
-- **Explicit device control.** CPU or CUDA, with observable automatic CPU fallback
-  and strict failure when explicitly requested CUDA cannot run.
-- **Live camera page.** `trueme web` serves a local page that scores your webcam
-  against one reference photo in real time, using the same pipeline.
-- **Scriptable results.** Structured JSON, stable exit codes, environment
-  diagnostics, and optional reports protected against overwriting input images.
+> [!NOTE]
+> The score is a reference, not a guarantee: real systems use their own models,
+> thresholds, and liveness checks. Use only your own photos or photos used with
+> explicit consent.
 
-## Quick Start
+## 💼 Everyday uses
 
-The steps below use a Unix shell (Linux or macOS) and the CPU runtime. Windows
-PowerShell and CUDA setup are covered in the [installation guide](docs/installation.md).
+| | Situation | What to compare |
+| --- | --- | --- |
+| 🪪 | About to submit a retouched photo for a work badge, gym card, or campus card | The edited photo vs. a plain selfie taken today |
+| 🎚️ | Unsure how far to push the beauty filter | Each edit level vs. the same selfie; see where the score drops |
+| 🗂️ | Choosing one enrollment photo out of several shots | Every candidate vs. the same selfie; keep the most similar one |
+| 💇 | New haircut, glasses, beard, or a few years have passed | Your old registered photo vs. a fresh selfie; decide whether to update it |
+| 💡 | The door camera keeps missing you | Live page with your enrollment photo; see how lighting and angle move the score |
+| 👨‍👩‍👧 | Helping family set up their check-in photo | Their photo vs. their selfie, with their consent |
 
-**Prerequisites:** Python 3.11 or newer (currently up to 3.13, the newest version
-with ONNX Runtime 1.20 wheels), Git, GNU Make, and `curl`.
+## ✨ Features
 
-### 1. Set up the environment
+- 🎭 **Edited photo vs. real you.** One reference photo, one probe photo or live
+  camera, one similarity score with a simple scale to read it.
+- 🔒 **Purely local.** Everything runs in a process on your machine: no uploads,
+  accounts, or telemetry, and nothing is saved unless you ask for a report.
+- 📸 **Live camera page.** `trueme web` scores your webcam against the reference
+  in real time.
+- 🛠️ **CLI for scripts.** JSON output, stable exit codes, CPU or CUDA.
+
+<a id="quick-start"></a>
+
+## 🚀 Quick Start
+
+Three steps on Linux or macOS with a CPU. 🐧🍎 Windows and CUDA setup are in the
+[installation guide](docs/installation.md).
+
+You need Python 3.11–3.13, Git, GNU Make, and `curl`.
+
+### 1️⃣ Install
 
 ```sh
 git clone https://github.com/ZhiWei-Ou/trueme.git
 cd trueme
 make setup DEVICE=cpu
-.venv/bin/trueme --version
 ```
 
-`make setup` creates a project-local `.venv` and installs pinned dependencies;
-activation is unnecessary. It uses `python3` by default; if that is not 3.11–3.13,
-pass the interpreter explicitly, for example `make setup PYTHON=python3.12 DEVICE=cpu`.
-Use `gmake` where GNU Make has that name.
+This creates a project-local `.venv`; no activation needed. If `python3` is not
+3.11–3.13, add `PYTHON=python3.12` (or another supported version).
 
-### 2. Download the models
-
-Weights are not included in Git. Fetch the two pinned OpenCV Zoo models:
+### 2️⃣ Download the models
 
 ```sh
 mkdir -p models
 base=https://media.githubusercontent.com/media/opencv/opencv_zoo/48b10fa505aeb51fbd127fc60a5c660040e823b7/models
 curl -fL -o models/face_detection_yunet_2023mar.onnx "$base/face_detection_yunet/face_detection_yunet_2023mar.onnx"
 curl -fL -o models/face_recognition_sface_2021dec.onnx "$base/face_recognition_sface/face_recognition_sface_2021dec.onnx"
-.venv/bin/trueme doctor --model-dir models
 ```
 
-TrueMe verifies both checksums before initialization; sources and licenses are in
-the [model guide](docs/models.md). In a CPU installation, `doctor` reporting
-unavailable CUDA is expected; CPU initialization should succeed.
+The weights are not in Git; TrueMe checks their checksums before use.
+Sources and licenses: [model guide](docs/models.md).
 
-### 3. Compare two photos
-
-Place two consented, single-frame photos in the project root as `reference.jpg`
-and `probe.jpg`, each containing exactly one face:
-
-```sh
-.venv/bin/trueme compare --reference reference.jpg --probe probe.jpg --model-dir models --device cpu
-```
-
-The result includes cosine similarity, model names, configured providers, any
-quality warnings, and an interpretation notice. A higher score means greater
-feature similarity under SFace; TrueMe applies no pass/fail threshold.
-
-## Usage
-
-### Compare live with your camera
+### 3️⃣ Open the live page
 
 ```sh
 .venv/bin/trueme web --model-dir models --device cpu
 ```
 
-Open the printed address (default `http://127.0.0.1:8765/`), choose a reference
-photo, then start the camera. The page draws the detected face and updates the
-cosine similarity several times per second against the 0.363 / 0.5 scale above.
-Frames without exactly one face get no score. Use `--host` and `--port` to pick
-the address, for example `--port 9000`. The reference and frames stay in the
-server's memory and are discarded when you press Ctrl+C.
+Open <http://127.0.0.1:8765/>, choose your edited photo as the reference, and
+start the camera. Watch the score move as you turn your head. 🎯
+Press Ctrl+C to stop; the photo and frames are discarded.
 
-Browsers grant camera access only on `localhost`/`127.0.0.1` or HTTPS, so keep
-the default loopback address. Binding another `--host` prints a warning: it
-exposes the page to that network without authentication or TLS.
+## 🧰 Usage
 
-### Inspect the installation
+### 🖼️ Compare two photo files
 
 ```sh
-.venv/bin/trueme --help
-.venv/bin/trueme models list --json
-.venv/bin/trueme doctor --model-dir models --json
+.venv/bin/trueme compare --reference edited.jpg --probe camera.jpg --model-dir models --device cpu
 ```
 
-Help, version, and basic diagnostics work without weights. `doctor` distinguishes
-provider enumeration and session initialization from actual inference. Use
-`compare` to exercise inference; `--verbose` adds device diagnostics to stderr.
+Each photo must contain exactly one face. Add `--json` for machine-readable
+output, or `--output result.report.json` to save a report.
 
-### Export a report
+### 🎚️ Compare several edits at once
+
+Score every version of an edited photo against the same selfie:
 
 ```sh
-.venv/bin/trueme compare --reference reference.jpg --probe probe.jpg --model-dir models --json --output result.report.json
+for photo in edits/*.jpg; do
+  score=$(.venv/bin/trueme compare --reference "$photo" --probe selfie.jpg --model-dir models --json |
+    python3 -c 'import json, sys; print(json.load(sys.stdin)["cosine_similarity"])')
+  printf '%.3f  %s\n' "$score" "$photo"
+done | sort -r
 ```
 
-`--json` writes one JSON object to stdout, including errors; diagnostics go to
-stderr. `--output` explicitly saves a report. Existing reports require
-`--overwrite`; input images and their aliases cannot be replaced. The parent
-directory must exist. Filenames and scores in reports may still be sensitive.
+Each comparison runs independently; there is no batch mode or saved history.
+
+### 🌐 Change the web address
+
+```sh
+.venv/bin/trueme web --model-dir models --host 127.0.0.1 --port 9000
+```
+
+Keep a loopback host: browsers allow camera access only on `localhost` or HTTPS,
+and any other host exposes the page to the network without authentication.
+
+### 📏 Reading the score
+
+| Cosine score | Rough read |
+| --- | --- |
+| Below 0.363 | 😶 Below the reference — camera, let's get acquainted again |
+| 0.363 to below 0.5 | 🙂 Meets the reference |
+| 0.5 or higher | 😄 Comfortably you — the camera's warming up to you |
+
+<a id="a-score-with-a-little-personality"></a>
 
 <details>
-<summary>JSON schema and exit codes</summary>
+<summary>🔬 Where these numbers come from</summary>
 
-Success reports use schema `1.0` and include `schema_version`, a timezone-aware
-`timestamp`, `application_version`, model names/versions/hashes, requested device,
-configured providers and fallback details, reference/probe basenames,
-`cosine_similarity`, `quality_warnings`, and `interpretation`.
-Images, embeddings, and full input paths are excluded. NaN and infinity are rejected.
-Errors contain `error.type`, `error.message`, and `error.exit_code`.
+0.363 is the cosine threshold for LFW reported by the
+[OpenCV 4.12 SFace tutorial](https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html)
+and used by the
+[OpenCV Zoo demo at our pinned revision](https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/sface.py).
+0.5 is an informal rule of thumb for a comfortable margin; it has no published
+source and has not been measured by TrueMe. The captions are for fun.
+
+The score is cosine similarity, not a confidence percentage. It does not
+establish identity, predict acceptance by a specific system, or certify ID-photo
+compliance. The CLI reports the raw score without applying any threshold.
+
+</details>
+
+<details>
+<summary>🧾 JSON output and exit codes</summary>
+
+`--json` prints exactly one JSON object to stdout, including errors; diagnostics
+go to stderr. Reports (schema `1.0`) contain the score, model names and hashes,
+device details, input basenames, and quality warnings. They never contain
+images, embeddings, or full paths. An existing report is replaced only with
+`--overwrite`, and an input image is never overwritten.
 
 | Code | Meaning |
 | --- | --- |
-| 0 | Completed; doctor may still report unavailable capabilities |
+| 0 | Completed |
 | 2 | Invalid input or command usage |
 | 3 | Missing, invalid, or incompatible model |
 | 4 | Device initialization or execution failure |
@@ -156,101 +178,55 @@ Errors contain `error.type`, `error.message`, and `error.exit_code`.
 
 </details>
 
-<a id="a-score-with-a-little-personality"></a>
-
 <details>
-<summary>What the score illustration is based on</summary>
+<summary>💡 Tips and limits</summary>
 
-The [OpenCV 4.12 SFace tutorial](https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html)
-reports a cosine threshold of **0.363** for LFW. The
-[OpenCV Zoo demo at our pinned revision](https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/sface.py)
-uses the same value. The illustration places a score relative to that reference
-and adds an informal comfort mark at 0.5:
-
-| Cosine score | Rough evaluation |
-| --- | --- |
-| Below 0.363 | Below the reference |
-| 0.363 to below 0.5 | Meets the reference |
-| At least 0.5 | Comfortably you — the camera's warming up to you |
-
-"Meets the reference" means reaching the published SFace/LFW threshold, not a
-calibrated TrueMe acceptance decision. The 0.5 mark is a rule of thumb for a
-comfortable margin above that reference; it has no published source and has not
-been measured by TrueMe, and the playful caption adds no measured meaning.
-This guide does not establish identity, predict door access or attendance
-acceptance, or certify ID-photo compliance.
-TrueMe's CLI continues to report raw cosine similarity without applying a threshold.
+- Lighting, pose, blur, and small faces lower scores; TrueMe warns about likely
+  quality problems.
+- Animated or multi-frame files use their first frame only.
+- `trueme doctor --model-dir models` checks the runtime and models without photos.
+- No identity search, surveillance, liveness checks, or identity verification.
 
 </details>
 
-### Input limits and common errors
-
-Run each reference/probe pair independently; batch processing is not supported. Animated and multi-frame files, including MPO containers
-with `.jpg` extensions, are rejected; explicitly export the intended single frame.
-No/multiple-face errors require an input containing exactly one visible face.
-Quality warnings are heuristics; lighting, pose, and alignment can affect scores.
-
-For missing weights, follow the model guide and check the model directory.
-For CUDA failures, check the GPU setup or select CPU. Report errors require a
-writable destination distinct from the inputs. The CLI offers no identity search,
-surveillance, liveness checks, or identity verification, and does not promise
-secure memory erasure.
-
-## Configuration
+## ⚙️ Configuration
 
 | Setting | Purpose | Default |
 | --- | --- | --- |
-| `--model-dir` | Directory containing both model files | Environment variable, then per-user storage |
-| `TRUEME_MODEL_DIR` | Model directory when the option is omitted | Unset |
-| `--device auto\|cpu\|cuda` | Select inference device | `auto` |
-| `--output` | Explicit JSON report destination | No file written |
-| `--overwrite` | Allow replacement of an existing report | Off |
-| `--host` (`web`) | Address the live page listens on | `127.0.0.1` |
-| `--port` (`web`) | Port the live page listens on | `8765` |
+| `--model-dir` | Folder with both model files | `TRUEME_MODEL_DIR`, then a per-user folder |
+| `--device` | `auto`, `cpu`, or `cuda` | `auto` |
+| `--host` / `--port` | Address of the live page (`web`) | `127.0.0.1` / `8765` |
 
-Model lookup uses `--model-dir` → `TRUEME_MODEL_DIR` → the
-[platform's per-user directory](docs/installation.md#model-storage). It does not
-automatically search the project's `models/` directory. To skip `--model-dir`
-in the current shell, run `export TRUEME_MODEL_DIR="$PWD/models"`.
+`export TRUEME_MODEL_DIR="$PWD/models"` lets you omit `--model-dir`. `auto` tries
+CUDA and falls back to CPU with a reason; `cuda` fails instead of falling back.
+Details: [installation guide](docs/installation.md).
 
-`auto` attempts CUDA and reports CPU fallback on unavailability, initialization
-failure, or execution failure. `cuda` fails instead of silently using a CPU-only
-session; `cpu` forces CPU. Configured providers do not prove every operation ran
-on GPU. CPU and GPU environments must never contain both `onnxruntime` and
-`onnxruntime-gpu`; see [GPU setup](docs/installation.md#cpu-and-nvidia-cuda-environments).
+<a id="documentation"></a>
 
-## Documentation
+## 📚 Documentation
 
 | Guide | Use it for |
 | --- | --- |
-| [Installation](docs/installation.md) | Windows, macOS/Linux, CPU/GPU setup, model directories |
-| [Models](docs/models.md) | Acquisition, licenses, checksums, preprocessing, device behavior |
-| [Architecture](docs/architecture.md) | Module responsibilities and platform boundaries |
-| [Validation](docs/validation.md) | Actual CPU/CUDA checks and human acceptance steps |
-| [Security](SECURITY.md) | Privacy and vulnerability reporting guidance |
+| [Installation](docs/installation.md) | Windows, CPU/GPU setup, model folders |
+| [Models](docs/models.md) | Sources, licenses, checksums, preprocessing |
+| [Architecture](docs/architecture.md) | Modules and the live page's boundaries |
+| [Validation](docs/validation.md) | What has been tested, and on what |
+| [Security](SECURITY.md) | Privacy and vulnerability reporting |
 
-Windows is the primary target; Linux, macOS, and Windows CI jobs are configured.
-Recorded local runtime validation covers Linux CPU and CUDA. Native Windows/macOS
-and hosted CI execution are not established by that validation record.
+## 🤝 Contributing
 
-## Contributing
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) for scope, implementation conventions,
-and privacy requirements. Report bugs or ideas through
-[GitHub Issues](https://github.com/ZhiWei-Ou/trueme/issues). After setup, run:
+See [CONTRIBUTING.md](CONTRIBUTING.md) and report problems in
+[GitHub Issues](https://github.com/ZhiWei-Ou/trueme/issues). After `make setup`:
 
 ```sh
-make test
-make lint
-make build
+make test && make lint && make build
 ```
 
-These targets do not download weights or process personal photos. Keep photos,
-weights, reports, and environments out of commits. Builds produce a wheel and
-source archive under `dist/`.
+Never commit photos, weights, reports, or environments. If TrueMe made you
+smile, a ⭐ helps others find it.
 
-## License
+## 📄 License
 
-Original code is licensed under [MIT](LICENSE). Dependencies and model weights
-retain separate licenses and notices; consult the [model licenses](docs/models.md#sources-and-licenses)
-before using or redistributing weights.
+Code is [MIT](LICENSE). Dependencies and model weights keep their own licenses;
+see the [model licenses](docs/models.md#sources-and-licenses) before
+redistributing weights.
