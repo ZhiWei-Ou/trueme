@@ -1,124 +1,211 @@
-# TrueMe
+<h1 align="center">TrueMe</h1>
 
-TrueMe is a local Python CLI that compares a reference (enrollment) photo with a
-probe (camera-condition) photo using YuNet detection and SFace embeddings.
-Use only your own photos or photos used with explicit consent. Each image must
-contain exactly one face. Batch processing and live capture are outside this MVP.
+<p align="center">Compare a reference photo and a probe photo locally with a Python CLI.</p>
 
-The raw cosine similarity is model-specific: it is not a confidence percentage,
-identity judgment, or probability of passing verification. There is no universal
-acceptance threshold. Lighting, pose, image quality, and alignment affect results.
+<p align="center">
+  <a href="pyproject.toml"><img src="https://img.shields.io/badge/Python-3.11-526448" alt="Requires Python 3.11"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-526448" alt="MIT license"></a>
+</p>
 
-## A score, with a little personality
+<p align="center">
+  <a href="#quick-start">Quick Start</a> ·
+  <a href="#usage">Usage</a> ·
+  <a href="#documentation">Documentation</a> ·
+  <a href="CONTRIBUTING.md">Contributing</a>
+</p>
 
-![SFace example scores with playful captions and the published LFW benchmark reference](docs/assets/sface-score-guide.svg)
+<p align="center">
+  <img src="docs/assets/sface-score-guide.svg" alt="Illustrative SFace scores with playful captions and an OpenCV benchmark reference; not calibrated score bands" width="640">
+</p>
 
-The numerical reference comes from the [OpenCV 4.12 SFace tutorial](https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html):
-its published cosine thresholds are 0.363 (LFW), 0.340 (CALFW), 0.275 (CPLFW),
-0.277 (AgeDB-30), and 0.212 (CFP-FP). The
-[OpenCV Zoo demo at our pinned revision](https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/sface.py)
-also uses 0.363. These are dataset-specific references, not a ranking of security
-systems or thresholds calibrated for TrueMe's pipeline and user photos.
+TrueMe uses YuNet to detect and align faces, then SFace to compare their features.
+Use your own photos or photos used with explicit consent. Scores describe
+similarity under this model; they are not confidence percentages, identity
+verdicts, or predictions of third-party verification acceptance.
 
-The illustration uses example scores, not calibrated ranges; its captions are
-playful editorial copy. Higher scores are not confidence estimates, identity
-verdicts, or guarantees of acceptance. TrueMe continues to report raw cosine
-similarity without applying a pass/fail threshold.
+## Features
 
-## Installation
+- **One pair, one score.** Compare an enrollment/reference photo with a probe
+  representing camera conditions; require exactly one face in each image.
+- **Local processing.** No uploads, telemetry, accounts, or automatic history.
+  Inputs remain unchanged; crops and embeddings stay in memory.
+- **Photo handling.** JPEG, PNG, and WebP, Unicode paths, EXIF orientation, and
+  heuristic warnings for small faces, blur, and extreme exposure.
+- **Explicit device control.** CPU or CUDA, with observable automatic CPU fallback
+  and strict failure when explicitly requested CUDA cannot run.
+- **Scriptable results.** Structured JSON, stable exit codes, environment
+  diagnostics, and optional reports protected against overwriting input images.
 
-Python 3.11 and GNU Make are required for development. Windows is the primary
-target; Linux and macOS share the same portable pipeline. See
-[installation](docs/installation.md) for PowerShell setup and separate CPU/GPU
-environments, and [models](docs/models.md) for verified sources, weight licenses,
-checksums, acquisition commands, and preprocessing.
+## Quick Start
+
+The recommended first run uses **CPU**. Install 64-bit **Python 3.11**, Git, and
+**GNU Make**, then use PowerShell below. For macOS/Linux shell setup, follow the
+[installation guide](docs/installation.md#linux-and-macos); macOS uses CPU.
+Other Python minor versions are currently excluded by the package requirements.
 
 ```powershell
-make setup DEVICE=cpu PYTHON=python
-.\.venv\Scripts\trueme.exe --help
-.\.venv\Scripts\trueme.exe --version
+git clone https://github.com/ZhiWei-Ou/trueme.git
+cd trueme
+make setup PYTHON="py -3.11" DEVICE=cpu
 ```
 
-On Linux/macOS use `.venv/bin/trueme` or `.venv/bin/python -m trueme`.
-No command downloads model weights automatically. Original code is MIT;
-model weights and dependencies retain their own licenses and notices.
+Setup installs dependencies in the project's `.venv`; activation is unnecessary.
+Download the two pinned models explicitly (weights are not included in Git):
+
+```powershell
+New-Item -ItemType Directory -Force models | Out-Null
+$revision = "48b10fa505aeb51fbd127fc60a5c660040e823b7"
+$base = "https://media.githubusercontent.com/media/opencv/opencv_zoo/$revision/models"
+Invoke-WebRequest "$base/face_detection_yunet/face_detection_yunet_2023mar.onnx" -OutFile "models/face_detection_yunet_2023mar.onnx"
+Invoke-WebRequest "$base/face_recognition_sface/face_recognition_sface_2021dec.onnx" -OutFile "models/face_recognition_sface_2021dec.onnx"
+.\.venv\Scripts\trueme.exe doctor --model-dir models
+```
+
+Model sources, licenses, and publisher checksums are in the [model guide](docs/models.md).
+TrueMe verifies both hashes before initialization. In a CPU installation,
+`doctor` reporting unavailable CUDA is expected; CPU initialization should succeed.
+
+Place two consented, single-frame photos in the project root as `reference.jpg`
+and `probe.jpg`, each containing exactly one face. Then compare:
+
+```powershell
+.\.venv\Scripts\trueme.exe compare --reference reference.jpg --probe probe.jpg --model-dir models --device cpu
+```
+
+The result includes cosine similarity, model names, configured providers, any
+quality warnings, and an interpretation notice. A higher score means greater
+feature similarity under SFace; there is no universal pass/fail threshold.
+On macOS/Linux, the executable is `.venv/bin/trueme`; `python -m trueme` also works
+when invoked with the virtual environment's Python.
 
 ## Usage
 
-After acquiring the two documented model files:
+### Inspect the installation
 
 ```powershell
+.\.venv\Scripts\trueme.exe --help
+.\.venv\Scripts\trueme.exe --version
 .\.venv\Scripts\trueme.exe models list --json
-.\.venv\Scripts\trueme.exe doctor --model-dir "C:\Models\TrueMe" --json
-.\.venv\Scripts\trueme.exe compare --reference "photos\a1.jpg" --probe "photos\p1.jpg" --model-dir "C:\Models\TrueMe" --device cpu
-.\.venv\Scripts\trueme.exe compare --reference "photos\a1.jpg" --probe "photos\p2.jpg" --model-dir "C:\Models\TrueMe" --json --output "result.report.json"
+.\.venv\Scripts\trueme.exe doctor --model-dir models --json
 ```
 
-Run each pair independently. JPEG, PNG, and WebP are accepted, including Unicode
-paths. EXIF orientation is applied in memory. Animated and multi-frame images
-are rejected. Small face, blur, and exposure warnings are heuristics, not
-calibrated quality measurements.
+Help, version, and basic diagnostics work without weights. `doctor` distinguishes
+provider enumeration and session initialization from actual inference. Use
+`compare` to exercise inference; `--verbose` adds device diagnostics to stderr.
 
-Model directory precedence is `--model-dir`, then `TRUEME_MODEL_DIR`, then the
-platform's per-user directory documented in the installation guide.
+### Export a report
 
-`--device auto` attempts CUDA and falls back to CPU with a recorded reason when
-CUDA is unavailable or fails initialization/execution. `--device cuda` requires
-successful CUDA session configuration and execution; failure is an error.
-`--device cpu` forces CPU. Configured providers do not prove every operation ran
-on the GPU. `doctor` distinguishes provider availability and session initialization
-from inference; use `compare` to exercise actual inference. `--verbose` on
-`compare` prints device diagnostics to stderr.
+```powershell
+.\.venv\Scripts\trueme.exe compare --reference reference.jpg --probe probe.jpg --model-dir models --json --output result.report.json
+```
 
-## JSON and reports
+`--json` writes one JSON object to stdout, including errors; diagnostics go to
+stderr. `--output` explicitly saves a report. Existing reports require
+`--overwrite`; input images and their aliases cannot be replaced. The parent
+directory must exist. Filenames and scores in reports may still be sensitive.
 
-`--json` emits one JSON object on stdout; errors also use JSON and a nonzero exit
-status. Diagnostics go to stderr. Success uses schema `1.0`:
+<details>
+<summary>JSON schema and exit codes</summary>
 
-- `schema_version`, timezone-aware `timestamp`, `application_version`;
-- `models`: model identifiers and hashes;
-- `device`: requested device, configured providers, fallback details;
-- `inputs`: `reference` and `probe` basenames;
-- `cosine_similarity`, `quality_warnings`, and `interpretation`.
-
+Success reports use schema `1.0` and include `schema_version`, a timezone-aware
+`timestamp`, `application_version`, model names/versions/hashes, requested device,
+configured providers and fallback details, reference/probe basenames,
+`cosine_similarity`, `quality_warnings`, and `interpretation`.
+Images, embeddings, and full input paths are excluded. NaN and infinity are rejected.
 Errors contain `error.type`, `error.message`, and `error.exit_code`.
-No NaN or infinity is emitted. `--output` explicitly exports the same report as
-JSON. Existing files require `--overwrite`; input images and aliases cannot be
-replaced. Parent directories must already exist. Report basenames and scores
-may still be sensitive.
 
-| Exit code | Meaning |
+| Code | Meaning |
 | --- | --- |
-| 0 | Command completed (doctor findings may describe unavailable capabilities) |
+| 0 | Completed; doctor may still report unavailable capabilities |
 | 2 | Invalid input or command usage |
 | 3 | Missing, invalid, or incompatible model |
 | 4 | Device initialization or execution failure |
 | 5 | Face processing or invalid model output |
 | 6 | Unsafe or unwritable report destination |
 
-## Privacy and limitations
+</details>
 
-Processing is local: no uploads, telemetry, accounts, database, background
-service, or automatic history. Inputs are never modified. Crops and embeddings
-stay in memory and are not included in reports or logs. Secure memory erasure
-is not promised. No identity search, surveillance, identity verification, or
-liveness capability is provided.
+<a id="a-score-with-a-little-personality"></a>
 
-Missing weights: follow the model acquisition guide and set the model directory.
-No/multiple faces: provide a photo containing exactly one clearly visible face.
-CUDA failures: check the documented runtime/CUDA/cuDNN combination, or select
-CPU. Report errors: choose a new writable file outside the input paths.
+<details>
+<summary>What the score illustration is based on</summary>
 
-## Development and acceptance
+The [OpenCV 4.12 SFace tutorial](https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html)
+reports cosine thresholds of 0.363 (LFW), 0.340 (CALFW), 0.275 (CPLFW),
+0.277 (AgeDB-30), and 0.212 (CFP-FP). The
+[OpenCV Zoo demo at our pinned revision](https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/sface.py)
+also uses 0.363. These are dataset-specific references, not security-system
+rankings or thresholds calibrated for TrueMe's pipeline and your photos.
+The illustration uses example scores and playful captions, not calibrated bands.
+TrueMe does not turn them into identity judgments or acceptance decisions.
 
-```powershell
+</details>
+
+### Input limits and common errors
+
+Run each reference/probe pair independently. Batch processing and live capture
+are outside this MVP. Animated and multi-frame files, including MPO containers
+with `.jpg` extensions, are rejected; explicitly export the intended single frame.
+No/multiple-face errors require an input containing exactly one visible face.
+Quality warnings are heuristics; lighting, pose, and alignment can affect scores.
+
+For missing weights, follow the model guide and check the model directory.
+For CUDA failures, check the GPU setup or select CPU. Report errors require a
+writable destination distinct from the inputs. The CLI offers no identity search,
+surveillance, liveness checks, or identity verification, and does not promise
+secure memory erasure.
+
+## Configuration
+
+| Setting | Purpose | Default |
+| --- | --- | --- |
+| `--model-dir` | Directory containing both model files | Environment variable, then per-user storage |
+| `TRUEME_MODEL_DIR` | Model directory when the option is omitted | Unset |
+| `--device auto\|cpu\|cuda` | Select inference device | `auto` |
+| `--output` | Explicit JSON report destination | No file written |
+| `--overwrite` | Allow replacement of an existing report | Off |
+
+Model lookup uses `--model-dir` → `TRUEME_MODEL_DIR` → the
+[platform's per-user directory](docs/installation.md#model-storage). It does not
+automatically search the project's `models/` directory.
+
+`auto` attempts CUDA and reports CPU fallback on unavailability, initialization
+failure, or execution failure. `cuda` fails instead of silently using a CPU-only
+session; `cpu` forces CPU. Configured providers do not prove every operation ran
+on GPU. CPU and GPU environments must never contain both `onnxruntime` and
+`onnxruntime-gpu`; see [GPU setup](docs/installation.md#cpu-and-nvidia-cuda-environments).
+
+## Documentation
+
+| Guide | Use it for |
+| --- | --- |
+| [Installation](docs/installation.md) | Windows, macOS/Linux, CPU/GPU setup, model directories |
+| [Models](docs/models.md) | Acquisition, licenses, checksums, preprocessing, device behavior |
+| [Architecture](docs/architecture.md) | Module responsibilities and platform boundaries |
+| [Validation](docs/validation.md) | Actual CPU/CUDA checks and human acceptance steps |
+| [Security](SECURITY.md) | Privacy and vulnerability reporting guidance |
+
+Windows is the primary target; Linux, macOS, and Windows CI jobs are configured.
+Recorded local runtime validation covers Linux CPU and CUDA. Native Windows/macOS
+and hosted CI execution are not established by that validation record.
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) for scope, implementation conventions,
+and privacy requirements. After setup, run:
+
+```sh
 make test
 make lint
 make build
 ```
 
-These targets do not download weights or use personal photos. CI exercises them
-on Linux, macOS, and Windows without CUDA. See [architecture](docs/architecture.md)
-and [validation](docs/validation.md) for implementation boundaries, actual checks,
-and remaining human acceptance work. Configured CI is not evidence of a completed
-run on those platforms.
+Use `gmake` where GNU Make has that name. These targets do not download weights
+or process personal photos. Keep photos, weights, reports, and environments out
+of commits. Builds produce a wheel and source archive under `dist/`.
+
+## License
+
+Original code is licensed under [MIT](LICENSE). Dependencies and model weights
+retain separate licenses and notices; consult the [model licenses](docs/models.md#sources-and-licenses)
+before using or redistributing weights.
