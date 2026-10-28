@@ -16,7 +16,7 @@ class ModelSession:
             raise DeviceError("Device must be auto, cpu, or cuda.")
         try:
             import onnxruntime as ort
-        except ImportError as exc:
+        except (ImportError, OSError) as exc:
             raise ModelError(
                 "Install exactly one ONNX Runtime distribution: "
                 "use make setup DEVICE=cpu or DEVICE=gpu."

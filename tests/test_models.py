@@ -1,3 +1,4 @@
+import builtins
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -9,6 +10,19 @@ from trueme.errors import DeviceError, ModelError, ProcessingError
 from trueme.models.device import CPU, CUDA, ModelSession
 from trueme.models.onnx import SFACE_TARGET, align_face
 from trueme.models.registry import load_manifest, validated_models
+
+
+def test_broken_native_runtime_is_actionable(monkeypatch):
+    original = builtins.__import__
+
+    def import_module(name, *args, **kwargs):
+        if name == "onnxruntime":
+            raise OSError("Native runtime library cannot load")
+        return original(name, *args, **kwargs)
+
+    monkeypatch.setattr(builtins, "__import__", import_module)
+    with pytest.raises(ModelError, match="ONNX Runtime"):
+        ModelSession(Path("weight.onnx"), "cpu")
 
 
 @pytest.fixture
