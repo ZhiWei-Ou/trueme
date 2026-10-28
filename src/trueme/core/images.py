@@ -10,15 +10,14 @@ from trueme.errors import InputError
 
 
 def load_image(path: Path) -> np.ndarray:
-    """Return an EXIF-oriented BGR image; reject unsupported or multi-frame input."""
+    """Return the first frame as an EXIF-oriented BGR image."""
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
             with Image.open(path) as image:
-                if getattr(image, "n_frames", 1) != 1:
-                    raise InputError("Animated and multi-frame images are not supported.")
-                if image.format not in {"JPEG", "PNG", "WEBP"}:
+                if image.format not in {"JPEG", "MPO", "PNG", "WEBP"}:
                     raise InputError("Use a JPEG, PNG, or WebP image.")
+                image.seek(0)
                 oriented = ImageOps.exif_transpose(image).convert("RGB")
                 return np.array(oriented, dtype=np.uint8)[:, :, ::-1].copy()
     except (OSError, UnidentifiedImageError, ValueError) as exc:

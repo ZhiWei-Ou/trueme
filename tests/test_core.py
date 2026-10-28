@@ -47,17 +47,35 @@ def test_unicode_exif_orientation_and_unchanged_input(tmp_path):
     assert path.read_bytes() == original
 
 
-def test_invalid_and_animated_images(tmp_path):
+def test_invalid_and_unsupported_images(tmp_path):
     invalid = tmp_path / "bad.jpg"
     invalid.write_bytes(b"not an image")
     with pytest.raises(InputError, match="Cannot read"):
         load_image(invalid)
-    animated = tmp_path / "animated.png"
-    Image.new("RGB", (4, 4), "red").save(
-        animated, save_all=True, append_images=[Image.new("RGB", (4, 4), "blue")]
+    unsupported = tmp_path / "image.gif"
+    Image.new("RGB", (4, 4), "red").save(unsupported)
+    with pytest.raises(InputError, match="JPEG, PNG, or WebP"):
+        load_image(unsupported)
+
+
+@pytest.mark.parametrize("format,suffix", [("MPO", "jpg"), ("PNG", "png"), ("WEBP", "webp")])
+def test_multiframe_uses_first_frame_with_orientation(tmp_path, format, suffix):
+    path = tmp_path / f"multiframe.{suffix}"
+    first = Image.new("RGB", (12, 6), "red")
+    exif = first.getexif()
+    exif[274] = 6
+    first.save(
+        path, format=format, save_all=True,
+        append_images=[Image.new("RGB", (12, 6), "blue")], exif=exif,
     )
-    with pytest.raises(InputError, match="multi-frame"):
-        load_image(animated)
+    original = path.read_bytes()
+    with Image.open(path) as image:
+        assert image.n_frames == 2
+    loaded = load_image(path)
+    assert loaded.shape == (12, 6, 3)
+    assert np.all(loaded[:, :, 2] > 240)
+    assert np.all(loaded[:, :, 0] < 15)
+    assert path.read_bytes() == original
 
 
 def test_quality_hints_are_heuristics():
