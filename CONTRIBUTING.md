@@ -9,9 +9,17 @@ documentation. Original contributions use the repository's MIT license;
 dependencies and model weights retain their own licenses. Verify model weight
 permissions independently of code licensing before proposing an integration.
 
-Development targets Python 3.11 and a project-local .venv, with Windows as the
-primary platform. Do not install packages globally or change execution policy.
+Development targets Python 3.11 and a project-local .venv on Linux, macOS, and
+Windows, with Windows as the primary platform. The planned common entry point
+is Makefile for setup, tests, linting, and package builds; targets are not yet
+implemented. Do not install packages globally or change execution policy.
 CPU and GPU ONNX Runtime packages must use separate environments.
+
+Put actual OS differences behind narrow abstract interfaces and platform-specific
+infrastructure implementations. Share portable code and introduce abstractions
+only with concrete callers. Keep validation at external boundaries, preserve
+required safety checks, and avoid repeated internal checks, silent fallback,
+speculative retries, and unnecessary frameworks.
 
 Include meaningful tests for changed behavior and update affected documentation.
 CI must not require private photos, restricted weights, GPUs, or paid services.

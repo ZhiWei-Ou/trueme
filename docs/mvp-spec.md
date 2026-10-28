@@ -34,7 +34,8 @@ server, cloud API, API key, paid service, or automatic history is required.
 ## Runtime and layout
 
 Use Python 3.11, Typer, Rich, ONNX Runtime, OpenCV, NumPy, Pillow, and pytest.
-Windows is the primary platform. Use pyproject.toml, src/trueme/, a local .venv,
+Support Linux, macOS, and Windows, with Windows as the primary platform.
+Use pyproject.toml, src/trueme/, a local .venv,
 and an installable trueme entry point plus python -m trueme.
 
 Keep cli.py and config.py separate from core image loading, face processing,
@@ -42,6 +43,44 @@ similarity, quality, and report modules. Put model interfaces, registry,
 device selection, and ONNX adapters in models/. Keep diagnostics separate.
 Do not require Docker, databases, or a plugin framework. A standalone Windows
 executable is optional and outside the initial MVP.
+
+## Build entry point and platform boundaries
+
+Use a root Makefile as the common entry point for development and builds.
+Keep Python package metadata and the build backend in pyproject.toml. Planned
+targets are help, setup, test, lint, and build; these targets do not exist yet.
+The default target should show help. Setup must explicitly select CPU or GPU
+dependencies without installing both ONNX Runtime distributions together.
+Tests, linting, and builds must not implicitly download models or process photos.
+
+Invoke tools through the local virtual environment without requiring activation.
+Keep Make recipes short. Use portable Python helpers only where shell or path
+differences actually require them; do not assume POSIX shell commands exist on
+Windows. Document the required Make implementation and Windows shell setup when
+the build is implemented, without changing system execution policy or requiring
+WSL. CI should exercise the same targets on Linux, macOS, and Windows and report
+platforms that have actually been verified.
+
+Expose OS-dependent application capabilities through narrow abstract interfaces
+and Linux, macOS, and Windows infrastructure implementations. Introduce each
+interface with a concrete caller and a known platform difference. Per-user model
+storage location is the first expected example. Keep contracts separate from
+concrete infrastructure and choose the implementation once at application startup.
+The comparison pipeline consumes the interface without OS-specific branches.
+
+Reuse portable logic across implementations. Do not create three copies of
+image loading, alignment, similarity, or reporting. ONNX execution-provider
+selection remains a runtime capability check, not an assumption based on the
+host OS. Do not invent platform services before they are needed or build a
+general dependency injection or plugin framework.
+
+Keep the main execution path direct. Validate image inputs, configuration,
+model outputs, and report destinations at their boundaries, then rely on those
+contracts internally. Handle known failures where recovery or a useful CLI
+error is possible. Avoid repeated validation, broad exception swallowing,
+silent success defaults, and retries without a concrete failure model. These
+constraints do not remove required vector checks, input-file protection,
+privacy protections, or explicit CUDA failure behavior.
 
 ## CLI contract
 
@@ -186,8 +225,11 @@ Original code is MIT; weights and dependencies retain separate licenses.
 
 1. Inspect repository, instructions, and environment.
 2. Research model sources, licenses, and runtime compatibility.
-3. Add packaging, local environment setup, and tested dependency pins.
-4. Implement adapters and device handling, then image comparison.
+3. Add packaging, Makefile targets, local environment setup, and tested
+   dependency pins. Establish the smallest required platform interface and
+   Linux/macOS/Windows infrastructure implementations with their first caller.
+4. Implement model adapters and device handling, then image comparison using
+   the platform interfaces only where needed.
 5. Implement CLI, diagnostics, and JSON report export.
 6. Add and run meaningful automated and available integration checks.
 7. Complete README, architecture/model documentation, and CI.

@@ -32,7 +32,9 @@ repository root, read it; do not create or maintain it without authorization.
 
 ## Implementation conventions
 
-- Target Python 3.11 and Windows first; keep core logic portable.
+- Target Python 3.11 on Linux, macOS, and Windows, with Windows as the primary
+  platform. Use Makefile as the common development and build entry point;
+  pyproject.toml remains the source of Python packaging metadata.
 - Use a src/ package layout, pyproject.toml, Typer, Rich, ONNX Runtime,
   OpenCV, NumPy, Pillow, and pytest. Remain a pure CLI.
 - Use a project-local .venv. Never modify global Python packages, global Git
@@ -42,6 +44,18 @@ repository root, read it; do not create or maintain it without authorization.
   onnxruntime-gpu together in one environment.
 - Separate CLI presentation, image processing, model adapters, device selection,
   diagnostics, and reporting. Avoid databases and generic plugin frameworks.
+- Put OS-dependent capabilities behind small abstract interfaces with Linux,
+  macOS, and Windows infrastructure implementations. Define interfaces around
+  actual callers and platform differences, and select implementations at the
+  application entry boundary. Keep OS branching out of core comparison logic.
+- Share portable code; do not duplicate the pipeline per platform or wrap
+  every standard-library operation. Do not add speculative interfaces, unused
+  layers, dependency injection containers, or automatic plugin discovery.
+- Validate external inputs and model/runtime outputs at their boundaries.
+  Trust established internal contracts instead of repeating checks throughout
+  the call chain. Catch errors only where they can be handled or translated
+  usefully; avoid broad exception swallowing, silent defaults, and speculative
+  retries. Preserve required privacy, file safety, and device fallback checks.
 - Load installed resources independently of the working directory. Resolve
   model locations by explicit option, environment variable, then user data dir.
 - Keep help, version, and basic diagnostics usable without weights. Avoid eager
