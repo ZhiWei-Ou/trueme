@@ -25,6 +25,21 @@ def emit(value: dict, as_json: bool) -> None:
         console.print_json(data=value)
 
 
+def show_comparison(report: dict) -> None:
+    console.print(f"Cosine similarity: {report['cosine_similarity']:.6f}")
+    console.print(
+        "Models: " + ", ".join(f"{model['name']} {model['version']}" for model in report["models"])
+    )
+    for role, session in report["device"]["sessions"].items():
+        console.print(f"{role}: {', '.join(session['configured_providers'])}")
+        if session["fallback_reason"]:
+            console.print(session["fallback_reason"])
+    for role, warnings in report["quality_warnings"].items():
+        for warning in warnings:
+            console.print(f"{role}: {warning}")
+    console.print(report["interpretation"])
+
+
 def version_callback(value: bool) -> None:
     if value:
         typer.echo(__version__)
@@ -77,7 +92,10 @@ def compare(
         write_report(report, output, (reference, probe), overwrite=overwrite)
     if verbose:
         typer.echo(json.dumps(bundle.device_info(), allow_nan=False), err=True)
-    emit(report, as_json)
+    if as_json:
+        emit(report, True)
+    else:
+        show_comparison(report)
 
 
 @app.command()
