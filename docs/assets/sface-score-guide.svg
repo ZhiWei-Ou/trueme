@@ -1,42 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1080" viewBox="0 0 1200 1080" role="img" aria-labelledby="title desc">
-<title id="title">TrueMe: real benchmarks, playful vibes</title>
-<desc id="desc">SFace cosine similarity example scores with arithmetic offsets from OpenCV's published LFW threshold of 0.363. Playful captions are editorial, not calibrated score bands. Public thresholds: LFW 0.363, CALFW 0.340, CPLFW 0.275, AgeDB-30 0.277, CFP-FP 0.212. No identity or acceptance predictions.</desc>
-<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101b32"/><stop offset="1" stop-color="#19253c"/></linearGradient></defs>
-<rect width="1200" height="1080" rx="28" fill="url(#bg)"/>
-<g font-family="Inter, DejaVu Sans, Arial, sans-serif" fill="#eff4ff">
-<text x="56" y="62" font-size="16" letter-spacing="3" fill="#80e0c5">TRUEME / SFACE SCORE COMPANION</text>
-<text x="56" y="118" font-size="40" font-weight="700">Real benchmarks. Playful vibes.</text>
-<text x="56" y="154" font-size="18" fill="#b8c7df">A little context for the number. A little kindness for the person.</text>
-<rect x="56" y="186" width="1088" height="112" rx="16" fill="#24334c"/>
-<text x="80" y="223" font-size="15" fill="#80e0c5" letter-spacing="1">PUBLISHED REFERENCE / OPENCV LFW</text>
-<text x="80" y="274" font-size="42" font-weight="700">0.363</text>
-<text x="275" y="242" font-size="19">Cosine threshold in OpenCV's SFace tutorial and demo.</text>
-<text x="275" y="273" font-size="16" fill="#b8c7df">A benchmark operating point, not a universal acceptance line.</text>
-<text x="76" y="341" font-size="14" fill="#b8c7df">EXAMPLE SCORE</text>
-<text x="270" y="341" font-size="14" fill="#b8c7df">SCORE − 0.363</text>
-<text x="487" y="341" font-size="14" fill="#b8c7df">THE VIBE / EDITORIAL CAPTION</text>
-
-<rect x="56" y="360" width="1088" height="78" rx="10" fill="#1d2b43"/>
-<text x="76" y="409" font-size="32" font-weight="700">0.33</text><text x="270" y="407" font-size="24" fill="#80e0c5">-0.033</text>
-<text x="487" y="391" font-size="21" font-weight="600">Camera plot twist.</text><text x="487" y="419" font-size="16" fill="#b8c7df">The lighting has entered its experimental era.</text>
-<rect x="56" y="446" width="1088" height="78" rx="10" fill="#223149"/>
-<text x="76" y="495" font-size="32" font-weight="700">0.44</text><text x="270" y="493" font-size="24" fill="#80e0c5">+0.077</text>
-<text x="487" y="477" font-size="21" font-weight="600">Familiar energy.</text><text x="487" y="505" font-size="16" fill="#b8c7df">A little camera drama, a little familiar charm.</text>
-<rect x="56" y="532" width="1088" height="78" rx="10" fill="#1d2b43"/>
-<text x="76" y="581" font-size="32" font-weight="700">0.55</text><text x="270" y="579" font-size="24" fill="#80e0c5">+0.187</text>
-<text x="487" y="563" font-size="21" font-weight="600">Signature style.</text><text x="487" y="591" font-size="16" fill="#b8c7df">New angle. Still bringing the same energy.</text>
-<rect x="56" y="618" width="1088" height="78" rx="10" fill="#223149"/>
-<text x="76" y="667" font-size="32" font-weight="700">0.66</text><text x="270" y="665" font-size="24" fill="#80e0c5">+0.297</text>
-<text x="487" y="649" font-size="21" font-weight="600">Main-character energy.</text><text x="487" y="677" font-size="16" fill="#b8c7df">The camera changed. The vibe stayed.</text>
-<rect x="56" y="704" width="1088" height="78" rx="10" fill="#1d2b43"/>
-<text x="76" y="753" font-size="32" font-weight="700">0.88</text><text x="270" y="751" font-size="24" fill="#80e0c5">+0.517</text>
-<text x="487" y="735" font-size="21" font-weight="600">Copy-paste vibes.</text><text x="487" y="763" font-size="16" fill="#b8c7df">Even the pixels are having deja vu.</text>
-<text x="56" y="822" font-size="15" fill="#b8c7df">Example points, not score bands. Offsets are arithmetic, not confidence or safety margins.</text>
-<text x="56" y="859" font-size="14" letter-spacing="1" fill="#80e0c5">SAME TUTORIAL, DIFFERENT BENCHMARK THRESHOLDS</text>
-<text x="56" y="890" font-size="18">LFW 0.363   ·   CALFW 0.340   ·   CPLFW 0.275   ·   AgeDB-30 0.277   ·   CFP-FP 0.212</text>
-<path d="M56 915H1144" stroke="#40516b"/>
-<text x="56" y="945" font-size="16">These published thresholds have not been calibrated for TrueMe or your photos.</text>
-<text x="56" y="972" font-size="16">Similarity is not an identity verdict or a prediction of third-party acceptance.</text>
-<a href="https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html"><text x="56" y="1015" font-size="14" fill="#80e0c5">[1] OpenCV 4.12 · DNN-based Face Detection And Recognition</text></a>
-<a href="https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/sface.py"><text x="56" y="1042" font-size="14" fill="#80e0c5">[2] OpenCV Zoo · pinned SFace demo threshold · 48b10fa</text></a>
-</g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="680" viewBox="0 0 880 680" role="img" aria-labelledby="title desc">
+  <title id="title">TrueMe — a score, a little personality</title>
+  <desc id="desc">Illustrative SFace cosine scores with playful, uncalibrated captions. OpenCV's published LFW threshold is 0.363; it is a benchmark reference, not a TrueMe acceptance threshold. Scores do not establish identity or predict acceptance by another system. Sources and context are in the README.</desc>
+  <rect width="880" height="680" rx="20" fill="#faf9f5"/>
+  <g font-family="Inter, DejaVu Sans, Arial, sans-serif" fill="#292d29">
+    <text x="64" y="61" font-size="13" letter-spacing="2.5" fill="#626b60">TRUEME / SFACE</text>
+    <text x="64" y="113" font-size="32" font-weight="600">A score, a little personality.</text>
+    <g font-size="12" letter-spacing="1.5" fill="#71766e">
+      <text x="64" y="174">EXAMPLE SCORE</text>
+      <text x="290" y="174">THE VIBE</text>
+    </g>
+    <g stroke="#dedfd6" stroke-width="1">
+      <path d="M64 191H816 M64 267H816 M64 343H816 M64 419H816 M64 495H816 M64 571H816"/>
+    </g>
+    <g font-size="29" font-weight="500" fill="#526448">
+      <text x="64" y="240">0.33</text>
+      <text x="64" y="316">0.44</text>
+      <text x="64" y="392">0.55</text>
+      <text x="64" y="468">0.66</text>
+      <text x="64" y="544">0.88</text>
+    </g>
+    <g font-size="23">
+      <text x="290" y="238">Camera plot twist.</text>
+      <text x="290" y="314">Familiar energy.</text>
+      <text x="290" y="390">Signature style.</text>
+      <text x="290" y="466">Main-character energy.</text>
+      <text x="290" y="542">Copy-paste vibes.</text>
+    </g>
+    <a href="https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html">
+      <text x="64" y="608" font-size="14" fill="#526448">OpenCV LFW reference: 0.363</text>
+    </a>
+    <text x="64" y="638" font-size="13" fill="#656b61">Playful examples, not calibrated bands or identity / acceptance judgments.</text>
+  </g>
+</svg>

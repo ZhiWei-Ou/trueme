@@ -11,7 +11,7 @@ acceptance threshold. Lighting, pose, image quality, and alignment affect result
 
 ## A score, with a little personality
 
-![SFace example scores with offsets from the published LFW threshold and playful captions](docs/assets/sface-score-guide.svg)
+![SFace example scores with playful captions and the published LFW benchmark reference](docs/assets/sface-score-guide.svg)
 
 The numerical reference comes from the [OpenCV 4.12 SFace tutorial](https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html):
 its published cosine thresholds are 0.363 (LFW), 0.340 (CALFW), 0.275 (CPLFW),
@@ -20,10 +20,10 @@ its published cosine thresholds are 0.363 (LFW), 0.340 (CALFW), 0.275 (CPLFW),
 also uses 0.363. These are dataset-specific references, not a ranking of security
 systems or thresholds calibrated for TrueMe's pipeline and user photos.
 
-The illustration uses example scores, not calibrated ranges. Its offsets are
-simply `score - 0.363`; captions are playful editorial copy. A larger offset is
-not a confidence estimate, identity verdict, or guarantee of acceptance. TrueMe
-continues to report raw cosine similarity without applying a pass/fail threshold.
+The illustration uses example scores, not calibrated ranges; its captions are
+playful editorial copy. Higher scores are not confidence estimates, identity
+verdicts, or guarantees of acceptance. TrueMe continues to report raw cosine
+similarity without applying a pass/fail threshold.
 
 ## Installation
 
