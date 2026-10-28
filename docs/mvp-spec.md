@@ -195,6 +195,14 @@ analytics, or automatic comparison history. Do not promise secure memory erasure
 
 ## Acceptance and documentation
 
+Keep automated unit coverage focused on essential contracts and concrete
+regressions. Avoid redundant tests, speculative defensive case matrices, and
+test scaffolding whose cost outweighs its practical value. Keep unit tests fast
+and separate expensive real-model and hardware checks from the default suite.
+Human acceptance testing follows developer validation and covers actual user
+workflows. Deliver clear completed-check results, limitations, and remaining
+acceptance steps; do not report this later stage as already completed.
+
 Automated coverage must include identical and orthogonal nonzero vectors;
 zero, mismatched and non-finite vectors; EXIF orientation; invalid image errors;
 required reference/probe arguments; reports without embeddings or image data; parseable JSON
@@ -223,6 +231,11 @@ Original code is MIT; weights and dependencies retain separate licenses.
 
 ## Implementation sequence
 
+Use subagents for independent, bounded work when doing so speeds delivery and
+limits the main agent's context load. Assign clear scope and file ownership,
+return concise evidence and results, and integrate through the main agent.
+Avoid delegation overhead for small or tightly coupled changes.
+
 1. Inspect repository, instructions, and environment.
 2. Research model sources, licenses, and runtime compatibility.
 3. Add packaging, Makefile targets, local environment setup, and tested
@@ -233,7 +246,11 @@ Original code is MIT; weights and dependencies retain separate licenses.
 5. Implement CLI, diagnostics, and JSON report export.
 6. Add and run meaningful automated and available integration checks.
 7. Complete README, architecture/model documentation, and CI.
-8. When authorized, commit coherent checked changes with short English subjects.
+8. When authorized, commit each coherent stage after its relevant checks pass,
+   throughout implementation rather than only at the end. Keep each commit
+   focused on one logical change and its required tests, callers, and docs;
+   avoid mixing unrelated features or leaving broken intermediate states.
+   Use short English subjects.
 9. Report actual results and remaining limitations without overstating validation.
 
 Keep all work local unless publication is separately requested. Never change

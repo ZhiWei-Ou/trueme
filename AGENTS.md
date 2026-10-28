@@ -80,10 +80,28 @@ explicit CUDA must fail rather than silently run a CPU-only session. Report
 configured providers and known fallback without claiming every operation used
 the GPU. Keep preprocessing identical across devices.
 
+## Agent collaboration
+
+Use multiple subagents when independent, bounded tasks can reduce completion
+time and keep the main agent's context focused. Delegate scoped research,
+implementation, or review with only the context needed and clear ownership of
+files. Avoid overlapping edits and duplicate investigation. Request concise
+results with evidence, changed files, validation, and unresolved issues rather
+than raw logs. The main agent owns integration, verification, and delivery.
+Keep small or tightly coupled work in one agent when delegation overhead would
+outweigh the benefit; do not create subagents merely to satisfy a process.
+
 ## Validation and delivery
 
 - Start with checks for affected behavior; reuse existing coverage. Add tests
   for concrete regressions and public contracts, not implementation details.
+- Keep unit tests focused and fast. Avoid exhaustive defensive cases without
+  a credible failure scenario, redundant coverage, and costly test scaffolding
+  with little practical value. Preserve the MVP's essential contract checks;
+  run expensive real-model or hardware checks separately when relevant.
+- A later human acceptance stage will assess actual workflows. Hand off clear
+  verification results and remaining checks; do not claim human acceptance
+  has occurred or use it as a substitute for necessary developer validation.
 - Unit tests and CI must run without personal photos, restricted weights,
   CUDA hardware, or paid services. Use mocks only as controlled unit fixtures.
 - Report unit tests, real CPU inference, real CUDA inference, and blocked
@@ -97,6 +115,12 @@ the GPU. Keep preprocessing identical across devices.
   single-line English summaries, preferably within 50 characters.
 - Commit only when the current request authorizes it. Never push, publish,
   rewrite history, or change global identity without explicit authorization.
+- When commits are authorized, commit incrementally at coherent, verified
+  milestones instead of accumulating unrelated features into one large commit.
+  Each commit should cover one logical change with its necessary caller,
+  test, and documentation updates. Split by behavior or responsibility, not
+  arbitrary file counts; do not split tightly coupled changes into broken
+  intermediate states. The main agent coordinates commits across subagent work.
 - If blocked, finish independent work and state the exact missing conditions.
 
 Original code uses MIT. Dependencies and weights retain their own licenses;
