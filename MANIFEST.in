@@ -1,0 +1,11 @@
+include Makefile requirements-lock.txt CONTRIBUTING.md SECURITY.md
+recursive-include scripts *.py
+recursive-include docs *.md
+recursive-include tests *.py
+prune photos
+prune inputs
+prune reports
+prune models
+prune .venv
+global-exclude *.onnx *.onnx.data *.ort *.pth *.pt *.safetensors *.ckpt
+global-exclude *.jpg *.jpeg *.png *.webp *.pyc

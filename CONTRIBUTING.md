@@ -1,8 +1,8 @@
 # Contributing to TrueMe
 
-TrueMe is currently being initialized. Read [AGENTS.md](AGENTS.md) and the
+TrueMe implements the local pairwise CLI MVP. Read [AGENTS.md](AGENTS.md) and the
 [MVP specification](docs/mvp-spec.md) for scope and acceptance requirements.
-The CLI, installation steps, and test commands are not available yet.
+See README.md and docs/installation.md for installation and CLI usage.
 
 Keep changes focused and preserve unrelated work. Use English for project
 documentation. Original contributions use the repository's MIT license;
@@ -10,9 +10,8 @@ dependencies and model weights retain their own licenses. Verify model weight
 permissions independently of code licensing before proposing an integration.
 
 Development targets Python 3.11 and a project-local .venv on Linux, macOS, and
-Windows, with Windows as the primary platform. The planned common entry point
-is Makefile for setup, tests, linting, and package builds; targets are not yet
-implemented. Do not install packages globally or change execution policy.
+Windows, with Windows as the primary platform. Use `make setup DEVICE=cpu`,
+`make test`, `make lint`, and `make build` through the project-local environment. Do not install packages globally or change execution policy.
 CPU and GPU ONNX Runtime packages must use separate environments.
 
 Put actual OS differences behind narrow abstract interfaces and platform-specific

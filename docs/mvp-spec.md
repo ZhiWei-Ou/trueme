@@ -2,10 +2,8 @@
 
 ## Status and purpose
 
-This document records the initial implementation target. The repository is in
-the project-initialization stage: there is no installable CLI, selected model,
-dependency lock, or verified inference yet. Implementation and model research
-are subsequent work.
+This document records the initial implementation target. The CLI MVP is implemented. See README.md for current commands and
+docs/validation.md for verified behavior and remaining acceptance checks.
 
 TrueMe compares two face photos locally with the user's consent:
 
@@ -47,8 +45,7 @@ executable is optional and outside the initial MVP.
 ## Build entry point and platform boundaries
 
 Use a root Makefile as the common entry point for development and builds.
-Keep Python package metadata and the build backend in pyproject.toml. Planned
-targets are help, setup, test, lint, and build; these targets do not exist yet.
+Keep Python package metadata and the build backend in pyproject.toml. Targets are help, setup, test, lint, and build.
 The default target should show help. Setup must explicitly select CPU or GPU
 dependencies without installing both ONNX Runtime distributions together.
 Tests, linting, and builds must not implicitly download models or process photos.
@@ -84,7 +81,7 @@ privacy protections, or explicit CUDA failure behavior.
 
 ## CLI contract
 
-Planned commands (not executable in the current repository):
+CLI commands:
 
 ```powershell
 trueme compare --reference "reference.jpg" --probe "probe.jpg" --device auto

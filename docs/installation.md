@@ -1,0 +1,85 @@
+# Installation and development
+
+Use 64-bit Python 3.11 and GNU Make. The application targets Windows, Linux,
+and macOS; actual validation coverage is recorded in the acceptance handoff.
+No virtual-environment activation or PowerShell execution-policy change is needed.
+
+## Windows (PowerShell)
+
+Install Python 3.11 from python.org with the Python launcher. Install GNU Make
+(for example, `choco install make` if Chocolatey is already installed), then open
+a new PowerShell with `make` on PATH. Native GNU Make uses the command interpreter;
+the recipes require neither WSL nor Unix utilities. In the repository:
+
+```powershell
+make setup PYTHON="py -3.11" DEVICE=cpu
+.\.venv\Scripts\trueme.exe --help
+make test
+make lint
+make build
+```
+
+Install the Microsoft Visual C++ runtime if ONNX Runtime reports missing native
+runtime DLLs. Use the [official ORT installation guidance](https://onnxruntime.ai/docs/install/).
+
+## Linux and macOS
+
+Install Python 3.11 and GNU Make through your normal OS tooling. On systems where
+GNU Make is named `gmake`, use that name for the commands below.
+
+```sh
+make setup PYTHON=python3.11 DEVICE=cpu
+.venv/bin/trueme --help
+make test
+make lint
+make build
+```
+
+Setup creates only the project's `.venv`, installs the editable project and
+pinned development dependencies, and runs `pip check`. `pyproject.toml` defines
+all direct dependencies; `requirements-lock.txt` constrains transitives for the
+tested environment. Other interpreter minor versions are intentionally excluded
+from this MVP. Build produces a wheel and source archive under `dist/`; weights,
+photos, reports, and environments are not packaged. The wheel includes the model
+manifest and loads it via package resources.
+
+## CPU and NVIDIA CUDA environments
+
+Choose one runtime distribution per environment. CPU uses `onnxruntime==1.20.1`;
+GPU uses `onnxruntime-gpu==1.20.1`. Setup refuses to add a runtime when the opposite
+one is already installed. To change variants, remove or rename the local `.venv`
+first, then run setup again. Never install both extras together.
+
+```powershell
+make setup PYTHON="py -3.11" DEVICE=gpu
+.\.venv\Scripts\trueme.exe doctor
+```
+
+The pinned PyPI GPU build uses CUDA 12.x and cuDNN 9.x according to the
+[official compatibility table](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#requirements).
+Install a compatible NVIDIA driver, CUDA runtime and cuDNN libraries; ensure
+native libraries are discoverable (`PATH` on Windows, the dynamic loader path on
+Linux). The cuDNN 8 and 9 major versions are not interchangeable. macOS uses CPU;
+this project does not provide a CUDA runtime there. Dependency installation does
+not establish usable GPU inference: provider availability, session initialization,
+and real execution are separate checks. No GPU success is implied by the pins.
+
+Model downloads are separate explicit steps in [models.md](models.md). Setup,
+unit tests, lint, and builds never download model weights or inspect private photos.
+For installing a built wheel in a fresh local Python 3.11 virtual environment,
+use `python -m pip install 'dist/trueme-0.1.0-py3-none-any.whl[cpu]'` (or `[gpu]`),
+using the new environment's Python executable.
+
+## Model storage
+
+The CLI resolves `--model-dir`, then `TRUEME_MODEL_DIR`, then the per-user default:
+
+| Platform | Default |
+| --- | --- |
+| Windows | `%LOCALAPPDATA%\TrueMe\models` (fallback: `~/AppData/Local/TrueMe/models`) |
+| macOS | `~/Library/Application Support/TrueMe/models` |
+| Linux | `$XDG_DATA_HOME/trueme/models`, or `~/.local/share/trueme/models` |
+
+A relative `XDG_DATA_HOME` is ignored as required by the XDG convention. Model
+lookup never creates directories or downloads files. Explicit and environment
+model paths support `~`, and relative paths resolve against the invocation directory.

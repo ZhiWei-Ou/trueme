@@ -1,0 +1,36 @@
+[
+  {
+    "role": "detector",
+    "name": "YuNet",
+    "version": "2023mar",
+    "source_commit": "48b10fa505aeb51fbd127fc60a5c660040e823b7",
+    "filename": "face_detection_yunet_2023mar.onnx",
+    "source_url": "https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_detection_yunet/face_detection_yunet_2023mar.onnx",
+    "download_url": "https://media.githubusercontent.com/media/opencv/opencv_zoo/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_detection_yunet/face_detection_yunet_2023mar.onnx",
+    "weight_license": "MIT",
+    "weight_license_url": "https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_detection_yunet/LICENSE",
+    "weight_license_evidence_url": "https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_detection_yunet/README.md",
+    "code_license": "MIT",
+    "code_license_url": "https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_detection_yunet/LICENSE",
+    "restrictions": "Commercial use and redistribution permitted under the listed license; preserve required notices. Weights are not distributed with TrueMe.",
+    "sha256": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+    "sha256_source": "https://raw.githubusercontent.com/opencv/opencv_zoo/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
+  },
+  {
+    "role": "recognizer",
+    "name": "SFace",
+    "version": "2021dec",
+    "source_commit": "48b10fa505aeb51fbd127fc60a5c660040e823b7",
+    "filename": "face_recognition_sface_2021dec.onnx",
+    "source_url": "https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/face_recognition_sface_2021dec.onnx",
+    "download_url": "https://media.githubusercontent.com/media/opencv/opencv_zoo/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/face_recognition_sface_2021dec.onnx",
+    "weight_license": "Apache-2.0",
+    "weight_license_url": "https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/LICENSE",
+    "weight_license_evidence_url": "https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/README.md",
+    "code_license": "Apache-2.0",
+    "code_license_url": "https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/LICENSE",
+    "restrictions": "Commercial use and redistribution permitted under the listed license; preserve required notices. Weights are not distributed with TrueMe.",
+    "sha256": "0ba9fbfa01b5270c96627c4ef784da859931e02f04419c829e83484087c34e79",
+    "sha256_source": "https://raw.githubusercontent.com/opencv/opencv_zoo/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/face_recognition_sface_2021dec.onnx"
+  }
+]
