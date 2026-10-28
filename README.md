@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/sface-score-guide.svg" alt="Illustrative SFace scores with playful captions and an OpenCV benchmark reference; not calibrated score bands" width="640">
+  <img src="docs/assets/sface-score-guide.svg" alt="SFace scores below or at least 0.363, with rough evaluations relative to the published LFW threshold" width="640">
 </p>
 
 TrueMe uses YuNet to detect and align faces, then SFace to compare their features.
@@ -131,13 +131,22 @@ Errors contain `error.type`, `error.message`, and `error.exit_code`.
 <summary>What the score illustration is based on</summary>
 
 The [OpenCV 4.12 SFace tutorial](https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html)
-reports cosine thresholds of 0.363 (LFW), 0.340 (CALFW), 0.275 (CPLFW),
-0.277 (AgeDB-30), and 0.212 (CFP-FP). The
+reports a cosine threshold of **0.363** for LFW. The
 [OpenCV Zoo demo at our pinned revision](https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/sface.py)
-also uses 0.363. These are dataset-specific references, not security-system
-rankings or thresholds calibrated for TrueMe's pipeline and your photos.
-The illustration uses example scores and playful captions, not calibrated bands.
-TrueMe does not turn them into identity judgments or acceptance decisions.
+uses the same value. The illustration gives a rough interpretation of a score
+relative to that reference:
+
+| Cosine score | Rough evaluation |
+| --- | --- |
+| Below 0.363 | Below the reference — camera, let's get acquainted again. |
+| At least 0.363 | Meets the reference — that familiar feeling is back. |
+
+"Meets the reference" means reaching the published SFace/LFW threshold, not a
+calibrated TrueMe acceptance decision. Higher values mean greater feature
+similarity under this model, not confidence percentages. The playful captions
+add no measured meaning. This guide does not establish identity, predict door
+access or attendance acceptance, or certify ID-photo compliance. TrueMe's CLI
+continues to report raw cosine similarity without applying a pass/fail threshold.
 
 </details>
 

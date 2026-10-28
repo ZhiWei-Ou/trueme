@@ -1,34 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="880" height="680" viewBox="0 0 880 680" role="img" aria-labelledby="title desc">
-  <title id="title">TrueMe — a score, a little personality</title>
-  <desc id="desc">Illustrative SFace cosine scores with playful, uncalibrated captions. OpenCV's published LFW threshold is 0.363; it is a benchmark reference, not a TrueMe acceptance threshold. Scores do not establish identity or predict acceptance by another system. Sources and context are in the README.</desc>
-  <rect width="880" height="680" rx="20" fill="#faf9f5"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="450" viewBox="0 0 880 450" role="img" aria-labelledby="title desc">
+  <title id="title">TrueMe — a score, a rough read</title>
+  <desc id="desc">A rough comparison with the published SFace LFW threshold: below 0.363 is below the reference; at least 0.363 meets the reference. Playful captions do not establish identity, door-access acceptance or ID-photo approval.</desc>
+  <rect width="880" height="450" rx="20" fill="#faf9f5"/>
   <g font-family="Inter, DejaVu Sans, Arial, sans-serif" fill="#292d29">
-    <text x="64" y="61" font-size="13" letter-spacing="2.5" fill="#626b60">TRUEME / SFACE</text>
-    <text x="64" y="113" font-size="32" font-weight="600">A score, a little personality.</text>
+    <text x="60" y="56" font-size="13" letter-spacing="2.5" fill="#626b60">TRUEME / SFACE</text>
+    <text x="60" y="105" font-size="32" font-weight="600">A score, a rough read.</text>
     <g font-size="12" letter-spacing="1.5" fill="#71766e">
-      <text x="64" y="174">EXAMPLE SCORE</text>
-      <text x="290" y="174">THE VIBE</text>
+      <text x="60" y="156">COSINE SCORE</text>
+      <text x="290" y="156">ROUGH READ</text>
     </g>
-    <g stroke="#dedfd6" stroke-width="1">
-      <path d="M64 191H816 M64 267H816 M64 343H816 M64 419H816 M64 495H816 M64 571H816"/>
+    <path d="M60 173H820 M60 263H820 M60 353H820" stroke="#dedfd6" stroke-width="1"/>
+    <g font-size="28" font-weight="500" fill="#526448">
+      <text x="60" y="229">&lt; 0.363</text>
+      <text x="60" y="319">≥ 0.363</text>
     </g>
-    <g font-size="29" font-weight="500" fill="#526448">
-      <text x="64" y="240">0.33</text>
-      <text x="64" y="316">0.44</text>
-      <text x="64" y="392">0.55</text>
-      <text x="64" y="468">0.66</text>
-      <text x="64" y="544">0.88</text>
+    <g font-size="22">
+      <text x="290" y="210">Below the reference.</text>
+      <text x="290" y="300">Meets the reference.</text>
     </g>
-    <g font-size="23">
-      <text x="290" y="238">Camera plot twist.</text>
-      <text x="290" y="314">Familiar energy.</text>
-      <text x="290" y="390">Signature style.</text>
-      <text x="290" y="466">Main-character energy.</text>
-      <text x="290" y="542">Copy-paste vibes.</text>
+    <g font-size="16" fill="#656b61">
+      <text x="290" y="239">Camera, let's get acquainted again.</text>
+      <text x="290" y="329">That familiar feeling is back.</text>
     </g>
     <a href="https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html">
-      <text x="64" y="608" font-size="14" fill="#526448">OpenCV LFW reference: 0.363</text>
+      <text x="60" y="387" font-size="14" fill="#526448">Reference: OpenCV SFace / LFW · 0.363</text>
     </a>
-    <text x="64" y="638" font-size="13" fill="#656b61">Playful examples, not calibrated bands or identity / acceptance judgments.</text>
+    <text x="60" y="418" font-size="13" fill="#656b61">Benchmark context only. No identity verdict, door-access or ID-photo approval.</text>
   </g>
 </svg>
