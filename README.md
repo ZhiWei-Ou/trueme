@@ -9,6 +9,22 @@ The raw cosine similarity is model-specific: it is not a confidence percentage,
 identity judgment, or probability of passing verification. There is no universal
 acceptance threshold. Lighting, pose, image quality, and alignment affect results.
 
+## A score, with a little personality
+
+![SFace example scores with offsets from the published LFW threshold and playful captions](docs/assets/sface-score-guide.svg)
+
+The numerical reference comes from the [OpenCV 4.12 SFace tutorial](https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html):
+its published cosine thresholds are 0.363 (LFW), 0.340 (CALFW), 0.275 (CPLFW),
+0.277 (AgeDB-30), and 0.212 (CFP-FP). The
+[OpenCV Zoo demo at our pinned revision](https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/sface.py)
+also uses 0.363. These are dataset-specific references, not a ranking of security
+systems or thresholds calibrated for TrueMe's pipeline and user photos.
+
+The illustration uses example scores, not calibrated ranges. Its offsets are
+simply `score - 0.363`; captions are playful editorial copy. A larger offset is
+not a confidence estimate, identity verdict, or guarantee of acceptance. TrueMe
+continues to report raw cosine similarity without applying a pass/fail threshold.
+
 ## Installation
 
 Python 3.11 and GNU Make are required for development. Windows is the primary
