@@ -19,7 +19,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/sface-score-guide.svg" alt="SFace cosine similarity scale: scores below 0.363 are below the published LFW reference; scores at or above it meet the reference" width="640">
+  <img src="docs/assets/sface-score-guide.svg" alt="SFace cosine similarity scale: below 0.363 is below the published LFW reference, 0.363 meets it, and 0.5 or higher is marked as comfortably similar" width="640">
 </p>
 
 TrueMe uses YuNet to detect and align faces, then SFace to compare their features.
@@ -145,16 +145,21 @@ Errors contain `error.type`, `error.message`, and `error.exit_code`.
 The [OpenCV 4.12 SFace tutorial](https://docs.opencv.org/4.12.0/d0/dd4/tutorial_dnn_face.html)
 reports a cosine threshold of **0.363** for LFW. The
 [OpenCV Zoo demo at our pinned revision](https://github.com/opencv/opencv_zoo/blob/48b10fa505aeb51fbd127fc60a5c660040e823b7/models/face_recognition_sface/sface.py)
-uses the same value. The illustration places a score relative to that reference:
+uses the same value. The illustration places a score relative to that reference
+and adds an informal comfort mark at 0.5:
 
 | Cosine score | Rough evaluation |
 | --- | --- |
 | Below 0.363 | Below the reference |
-| At least 0.363 | Meets the reference |
+| 0.363 to below 0.5 | Meets the reference |
+| At least 0.5 | Comfortably you — the camera's warming up to you |
 
 "Meets the reference" means reaching the published SFace/LFW threshold, not a
-calibrated TrueMe acceptance decision. This guide does not establish identity,
-predict door access or attendance acceptance, or certify ID-photo compliance.
+calibrated TrueMe acceptance decision. The 0.5 mark is a rule of thumb for a
+comfortable margin above that reference; it has no published source and has not
+been measured by TrueMe, and the playful caption adds no measured meaning.
+This guide does not establish identity, predict door access or attendance
+acceptance, or certify ID-photo compliance.
 TrueMe's CLI continues to report raw cosine similarity without applying a threshold.
 
 </details>

@@ -1,16 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="220" viewBox="0 0 800 220" role="img" aria-labelledby="title desc">
   <title id="title">TrueMe — SFace score guide</title>
-  <desc id="desc">A cosine similarity scale with the published SFace LFW reference at 0.363: lower scores are below the reference, higher scores meet it. Benchmark context only, not an identity verdict.</desc>
-  <rect width="800" height="200" rx="20" fill="#faf9f5"/>
+  <desc id="desc">A cosine similarity scale with the published SFace LFW reference at 0.363 and an informal comfort mark at 0.5: lower scores are below the reference, scores from 0.363 meet it, and scores from 0.5 are comfortably similar. Benchmark context and a rule of thumb only, not an identity verdict.</desc>
+  <rect width="800" height="220" rx="20" fill="#faf9f5"/>
   <g font-family="Inter, DejaVu Sans, Arial, sans-serif">
     <text x="60" y="56" font-size="13" letter-spacing="2.5" fill="#626b60">SFACE COSINE SIMILARITY</text>
     <rect x="60" y="96" width="247" height="10" rx="5" fill="#dedfd6"/>
-    <rect x="307" y="96" width="433" height="10" rx="5" fill="#526448"/>
-    <path d="M307 86V116" stroke="#292d29" stroke-width="2"/>
-    <text x="307" y="78" font-size="14" text-anchor="middle" fill="#292d29">0.363</text>
-    <g font-size="20" text-anchor="middle">
-      <text x="183" y="152" fill="#71766e">Below the reference</text>
-      <text x="523" y="152" fill="#526448" font-weight="600">Meets the reference</text>
+    <rect x="307" y="96" width="93" height="10" fill="#a9b59f"/>
+    <rect x="400" y="96" width="340" height="10" rx="5" fill="#526448"/>
+    <rect x="400" y="96" width="10" height="10" fill="#526448"/>
+    <path d="M307 86V116 M400 86V116" stroke="#292d29" stroke-width="2"/>
+    <g font-size="14" text-anchor="middle" fill="#292d29">
+      <text x="307" y="78">0.363</text>
+      <text x="400" y="78">0.5</text>
     </g>
+    <g font-size="16" text-anchor="middle">
+      <text x="183" y="146" fill="#71766e">Below the reference</text>
+      <text x="353" y="146" fill="#6b7a62">Meets it</text>
+      <text x="570" y="146" fill="#526448" font-weight="600">Comfortably you</text>
+    </g>
+    <text x="570" y="172" font-size="14" text-anchor="middle" fill="#656b61">The camera's warming up to you.</text>
   </g>
 </svg>
