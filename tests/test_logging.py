@@ -9,7 +9,15 @@ from pathlib import Path
 import pytest
 
 
-@pytest.mark.parametrize("mode", ["pipe", "terminal", "no_color", "bootstrap"])
+@pytest.mark.parametrize("mode", [
+    "pipe",
+    pytest.param("terminal", marks=pytest.mark.skipif(
+        sys.platform == "win32",
+        reason="Rich renders forced colors on Windows standard streams via the console API",
+    )),
+    "no_color",
+    "bootstrap",
+])
 def test_utc_logs_and_terminal_colors(mode):
     source = str(Path(__file__).resolve().parents[1] / "src")
     code = f"""
