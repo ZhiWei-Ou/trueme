@@ -21,7 +21,12 @@ def decode_image(data: bytes) -> np.ndarray:
     return _decode(io.BytesIO(data))
 
 
-def _decode(source: Path | BinaryIO) -> np.ndarray:
+def decode_rgba_image(data: bytes) -> np.ndarray:
+    """Decode the first oriented frame while preserving existing transparency."""
+    return _decode(io.BytesIO(data), preserve_alpha=True)
+
+
+def _decode(source: Path | BinaryIO, *, preserve_alpha: bool = False) -> np.ndarray:
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
@@ -29,8 +34,11 @@ def _decode(source: Path | BinaryIO) -> np.ndarray:
                 if image.format not in {"JPEG", "MPO", "PNG", "WEBP"}:
                     raise InputError("Use a JPEG, PNG, or WebP image.")
                 image.seek(0)
-                oriented = ImageOps.exif_transpose(image).convert("RGB")
-                return np.array(oriented, dtype=np.uint8)[:, :, ::-1].copy()
+                oriented = ImageOps.exif_transpose(image).convert(
+                    "RGBA" if preserve_alpha else "RGB"
+                )
+                pixels = np.array(oriented, dtype=np.uint8)
+                return pixels if preserve_alpha else pixels[:, :, ::-1].copy()
     except (OSError, UnidentifiedImageError, ValueError) as exc:
         raise InputError(
             "Cannot read image; check that it is a valid, accessible JPEG, PNG, or WebP."

@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -84,4 +85,7 @@ def test_installed_resources_outside_project(tmp_path):
 def test_web_requires_models_before_listening(tmp_path):
     result = run_cli("web", "--model-dir", str(tmp_path), "--port", "1")
     assert result.returncode == 3
+    assert result.stdout == ""
+    assert re.match(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z ERROR\s+", result.stderr)
+    assert "\x1b[" not in result.stderr
     assert "docs/models.md" in result.stderr

@@ -1,5 +1,20 @@
 "use strict";
 
+const intro = document.querySelector(".ink-intro");
+if (intro) {
+  const listeners = new AbortController();
+  const dismissIntro = () => {
+    listeners.abort();
+    intro.remove();
+  };
+  document.addEventListener("focusin", dismissIntro, { signal: listeners.signal });
+  window.addEventListener("blur", dismissIntro, { signal: listeners.signal });
+  // Finished or cancelled animations must never restart after a focus change.
+  Promise.all(intro.getAnimations().map((animation) => animation.finished))
+    .then(dismissIntro, dismissIntro);
+  if (document.hidden || document.activeElement !== document.body) dismissIntro();
+}
+
 // Thresholds match the README score guide: 0.363 is the published SFace/LFW
 // reference; 0.5 is an informal rule of thumb.
 const REFERENCE = 0.363;
@@ -12,7 +27,6 @@ const video = $("video");
 const overlay = $("overlay");
 const capture = document.createElement("canvas");
 
-let stream = null;
 let running = false;
 let referenceSet = false;
 
@@ -31,6 +45,7 @@ async function api(method, path, body) {
 function setReferenceState(isSet, message) {
   referenceSet = isSet;
   $("reference-clear").disabled = !isSet;
+  $("photo-export").disabled = !isSet || $("reference-preview").hidden;
   $("reference-status").textContent = message;
   if (!isSet) {
     $("reference-preview").hidden = true;
@@ -48,9 +63,10 @@ $("reference-input").addEventListener("change", async (event) => {
     const preview = $("reference-preview");
     if (preview.src) URL.revokeObjectURL(preview.src);
     preview.src = URL.createObjectURL(file);
+    preview.dataset.filename = file.name;
     preview.hidden = false;
     $("reference-empty").hidden = true;
-    setReferenceState(true, result.quality_warnings.join(" ") || "Reference ready.");
+    setReferenceState(true, result.quality_warnings.join(" "));
   } catch (error) {
     setReferenceState(referenceSet, error.message);
   }
@@ -62,41 +78,29 @@ $("reference-clear").addEventListener("click", async () => {
   showScore(null);
 });
 
-$("camera-toggle").addEventListener("click", () => (running ? stopCamera() : startCamera()));
-
 async function startCamera() {
   if (!navigator.mediaDevices?.getUserMedia) {
     $("camera-status").textContent =
       "Camera access needs a secure context: open the page through localhost or 127.0.0.1.";
     return;
   }
+  let stream;
   try {
     stream = await navigator.mediaDevices.getUserMedia({
       video: { width: { ideal: 1280 }, height: { ideal: 720 } },
       audio: false,
     });
   } catch (error) {
-    $("camera-status").textContent = `Camera unavailable: ${error.message}`;
+    $("camera-hint").textContent = "Camera unavailable.";
+    $("camera-status").textContent = error.message;
     return;
   }
   video.srcObject = stream;
   await video.play();
   running = true;
   $("camera-hint").hidden = true;
-  $("camera-toggle").textContent = "Stop camera";
   $("camera-status").textContent = "";
   loop();
-}
-
-function stopCamera() {
-  running = false;
-  stream?.getTracks().forEach((track) => track.stop());
-  stream = null;
-  video.srcObject = null;
-  overlay.getContext("2d").clearRect(0, 0, overlay.width, overlay.height);
-  $("camera-hint").hidden = false;
-  $("camera-toggle").textContent = "Start camera";
-  showScore(null);
 }
 
 async function loop() {
@@ -105,6 +109,7 @@ async function loop() {
     try {
       showFrame(await api("POST", "/api/frame", await grabFrame()));
     } catch (error) {
+      overlay.getContext("2d").clearRect(0, 0, overlay.width, overlay.height);
       $("camera-status").textContent = error.message;
     }
     const elapsed = performance.now() - started;
@@ -147,6 +152,7 @@ function scoreColor(score) {
 
 function showScore(score) {
   const marker = $("marker");
+  $("score").classList.toggle("idle", score === null);
   if (score === null) {
     $("score").textContent = "—";
     $("verdict").textContent = "";
@@ -156,14 +162,16 @@ function showScore(score) {
   $("score").textContent = score.toFixed(3);
   $("verdict").textContent =
     score >= COMFORT
-      ? "Comfortably you — the camera's warming up to you."
+      ? "Comfortably you"
       : score >= REFERENCE
-        ? "Meets the reference."
-        : "Below the reference — camera, let's get acquainted again.";
+        ? "Meets the reference"
+        : "Below the reference";
   marker.hidden = false;
   marker.style.left = `${Math.min(1, Math.max(0, score)) * 100}%`;
 }
 
+startCamera();
+
 api("GET", "/api/status").then((status) => {
-  if (status.reference_set) setReferenceState(true, "A reference from an earlier visit is loaded.");
+  if (status.reference_set) setReferenceState(true, "Reference from an earlier visit is loaded.");
 });

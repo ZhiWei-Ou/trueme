@@ -91,7 +91,11 @@ commands. These environment settings apply to the current shell only. On native
 Windows, use the CUDA/cuDNN installation and DLL search-path instructions above;
 the Linux wheel recipe is not a Windows validation claim.
 
-Model downloads are separate explicit steps in [models.md](models.md). Setup,
+Run `make download-models` to download the pinned weights into `models/` using
+`curl` (`curl.exe` on Windows). This target uses the selected `PYTHON` and does
+not require an existing virtual environment. It verifies SHA-256 checksums,
+skips matching files, and refuses to replace mismatched existing files.
+Manual download instructions are in [models.md](models.md). Setup,
 unit tests, lint, and builds never download model weights or inspect private photos.
 For installing a built wheel in a fresh local Python 3.11-3.13 virtual environment,
 use `python -m pip install 'dist/trueme-0.1.0-py3-none-any.whl[cpu]'` (or `[gpu]`),

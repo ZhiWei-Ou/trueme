@@ -42,6 +42,24 @@ not altered and no frame was silently selected.
 
 ## Live web page
 
+Photo export checks use synthetic images to verify JPEG/PNG dimensions, 300 DPI
+metadata, crop behavior, unchanged input bytes, invalid input handling, and
+HTTP attachment headers, plus preserved PNG alpha and JPEG white compositing. Run them with
+`python -m pytest tests/test_photo_export.py tests/test_web.py` in the local
+virtual environment. `node --test tests/web_photo_export.test.cjs` checks crop
+geometry and the explicit reference-preview/download flow with controlled DOM
+fixtures. Browser acceptance should check each size, portrait/landscape sources,
+EXIF-oriented photos, keyboard controls, downloads, and backend disconnects;
+these fixtures do not establish actual browser rendering or print quality.
+
+The opening overlay's lifecycle regression tests run separately with Node.js:
+`node --test tests/web_intro.test.cjs`. They execute the page script with
+controlled DOM and animation fixtures, covering completion, repeated focus
+changes, switching away during playback, keyboard focus, and reduced motion.
+These checks do not replace a browser test: on Windows, verify that Alt+Tab
+away and back during and after the opening never replays it, while reloading
+the page still allows one opening when reduced motion is disabled.
+
 On macOS (Apple Silicon), Python 3.11.18, CPU ONNX Runtime 1.20.1, with the
 pinned models and one user-provided photo: `trueme web` served the page; the
 API returned a face box and score for frames and no score for a blank frame;

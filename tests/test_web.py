@@ -102,3 +102,62 @@ def test_page_is_packaged_with_restrictive_headers(live):
     assert "default-src 'self'" in response.getheader("Content-Security-Policy")
     assert response.getheader("Cache-Control") == "no-store"
     assert live.request("GET", "/app.js")[0].status == 200
+    assert b"photo-export.js" in body
+    assert live.request("GET", "/photo-export.js")[0].status == 200
+
+
+def test_photo_export_download_and_validation(live):
+    response, body = live.request(
+        "POST", "/api/photo-export?size=two-inch", png(), {"Content-Type": "image/png"}
+    )
+    assert response.status == 200
+    assert response.getheader("Content-Type") == "image/jpeg"
+    assert response.getheader("Content-Disposition") == 'attachment; filename="trueme-two-inch.jpg"'
+    assert response.getheader("Cache-Control") == "no-store"
+    with Image.open(io.BytesIO(body)) as photo:
+        assert photo.size == (413, 579)
+        assert photo.info["dpi"] == (300, 300)
+    assert json.loads(live.request("GET", "/api/status")[1])["reference_set"] is False
+    for query in ("", "?size=unknown", "?size=one-inch&size=two-inch"):
+        assert post(live, f"/api/photo-export{query}", png())[0] == 400
+    assert post(live, "/api/photo-export?size=one-inch", b"invalid")[0] == 400
+    assert post(
+        live, "/api/photo-export?size=one-inch", png(), Origin="http://evil.example"
+    )[0] == 403
+
+
+def test_custom_photo_export_and_parameter_contract(live):
+    response, body = live.request(
+        "POST", "/api/photo-export?size=custom&width_mm=50.8&height_mm=25.4",
+        png(), {"Content-Type": "image/png"},
+    )
+    assert response.status == 200
+    assert response.getheader("Content-Disposition") == 'attachment; filename="trueme-custom.jpg"'
+    with Image.open(io.BytesIO(body)) as photo:
+        assert photo.size == (600, 300)
+    for query in (
+        "size=custom", "size=custom&width_mm=25", "size=one-inch&width_mm=25&height_mm=35",
+        "size=custom&width_mm=25&height_mm=35&extra=1",
+        "size=custom&width_mm=25&width_mm=30&height_mm=35",
+        "size=custom&width_mm=nan&height_mm=35",
+        "size=custom&width_mm=no&height_mm=35",
+        "size=custom&width_mm=301&height_mm=35",
+    ):
+        assert post(live, f"/api/photo-export?{query}", png())[0] == 400
+
+
+def test_png_photo_export_and_format_validation(live):
+    source = io.BytesIO()
+    Image.new("RGBA", (295, 413), (10, 20, 30, 128)).save(source, format="PNG")
+    response, body = live.request(
+        "POST", "/api/photo-export?size=one-inch&format=png", source.getvalue(),
+        {"Content-Type": "image/png"},
+    )
+    assert response.status == 200
+    assert response.getheader("Content-Type") == "image/png"
+    assert response.getheader("Content-Disposition") == 'attachment; filename="trueme-one-inch.png"'
+    with Image.open(io.BytesIO(body)) as photo:
+        assert photo.mode == "RGBA"
+        assert photo.getpixel((100, 100)) == (10, 20, 30, 128)
+    for query in ("format=gif", "format=", "format=png&format=jpeg"):
+        assert post(live, f"/api/photo-export?size=one-inch&{query}", png())[0] == 400

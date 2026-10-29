@@ -1,6 +1,7 @@
 """Command presentation and application composition."""
 
 import json
+import logging
 import sys
 from pathlib import Path
 from typing import Annotated
@@ -11,11 +12,13 @@ from rich.console import Console
 
 from trueme import __version__
 from trueme.errors import TrueMeError
+from trueme.logging_config import configure_logging
 
 app = typer.Typer(no_args_is_help=True, pretty_exceptions_enable=False)
 models_app = typer.Typer(no_args_is_help=True)
 app.add_typer(models_app, name="models")
 console = Console()
+logger = logging.getLogger(__name__)
 
 
 def emit(value: dict, as_json: bool) -> None:
@@ -81,6 +84,7 @@ def compare(
     from trueme.errors import InputError
     from trueme.models import create_models
 
+    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
     if device not in {"auto", "cpu", "cuda"}:
         raise InputError("Device must be auto, cpu, or cuda.")
     bundle = create_models(model_location(model_dir), device)
@@ -90,8 +94,7 @@ def compare(
     )
     if output is not None:
         write_report(report, output, (reference, probe), overwrite=overwrite)
-    if verbose:
-        typer.echo(json.dumps(bundle.device_info(), allow_nan=False), err=True)
+    logger.debug("Device diagnostics: %s", json.dumps(bundle.device_info(), allow_nan=False))
     if as_json:
         emit(report, True)
     else:
@@ -117,13 +120,12 @@ def web(
     bundle = create_models(model_location(model_dir), device)
     server = create_server(host, port, bundle)
     if not is_loopback(host):
-        typer.echo(
-            "Warning: listening beyond this computer exposes the reference and camera frames "
-            "to the network, and browsers allow camera access only on localhost or HTTPS.",
-            err=True,
+        logger.warning(
+            "Listening beyond this computer exposes the reference and camera frames "
+            "to the network, and browsers allow camera access only on localhost or HTTPS."
         )
-    console.print(f"TrueMe Live: {server.url}")
-    console.print("Press Ctrl+C to stop; the reference and frames are discarded on exit.")
+    logger.info("TrueMe Live: %s", server.url)
+    logger.info("Press Ctrl+C to stop; the reference and frames are discarded on exit.")
     with server:
         try:
             server.serve_forever()
@@ -152,6 +154,7 @@ def list_models(as_json: Annotated[bool, typer.Option("--json")] = False) -> Non
 
 def main() -> None:
     """Keep parser and application failures machine-readable in JSON mode."""
+    configure_logging()
     as_json = "--json" in sys.argv[1:]
     try:
         app(standalone_mode=False)
@@ -162,7 +165,7 @@ def main() -> None:
         if as_json:
             emit(error, True)
         else:
-            typer.echo(f"Error: {message}", err=True)
+            logger.error("%s", message)
         raise SystemExit(code) from None
 
 

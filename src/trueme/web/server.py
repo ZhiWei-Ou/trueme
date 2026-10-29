@@ -10,9 +10,11 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib import resources
 from typing import TYPE_CHECKING
+from urllib.parse import parse_qs
 
 from trueme.core.comparison import embed_single_face
 from trueme.core.images import decode_image
+from trueme.core.photos import export_photo
 from trueme.core.quality import quality_warnings
 from trueme.core.similarity import cosine_similarity
 from trueme.errors import DeviceError, InputError, ModelError, ProcessingError, TrueMeError
@@ -24,6 +26,7 @@ MAX_UPLOAD_BYTES = 15 * 1024 * 1024
 STATIC_FILES = {
     "/": ("index.html", "text/html; charset=utf-8"),
     "/app.js": ("app.js", "text/javascript; charset=utf-8"),
+    "/photo-export.js": ("photo-export.js", "text/javascript; charset=utf-8"),
     "/style.css": ("style.css", "text/css; charset=utf-8"),
     "/favicon.svg": ("favicon.svg", "image/svg+xml"),
 }
@@ -147,7 +150,9 @@ class Handler(BaseHTTPRequestHandler):
             "/api/reference": self.server.live.set_reference,
             "/api/frame": self.server.live.compare_frame,
         }
-        if self.path not in routes:
+        path, _, query = self.path.partition("?")
+        is_export = path == "/api/photo-export"
+        if self.path not in routes and not is_export:
             self._error(HTTPStatus.NOT_FOUND, "NotFound", "Unknown path.")
             return
         # Requiring an image type also forces a CORS preflight for cross-site scripts.
@@ -168,7 +173,35 @@ class Handler(BaseHTTPRequestHandler):
             return
         data = self.rfile.read(length)
         try:
-            self._json(HTTPStatus.OK, routes[self.path](data))
+            if is_export:
+                parameters = parse_qs(query, keep_blank_values=True)
+                if len(parameters.get("size", [])) != 1:
+                    raise InputError("Specify exactly one photo size.")
+                size = parameters["size"][0]
+                expected = {"size", "width_mm", "height_mm"} if size == "custom" else {"size"}
+                if not expected <= set(parameters) <= expected | {"format"} or any(
+                    len(values) != 1 for values in parameters.values()
+                ):
+                    raise InputError("Specify only the selected size and its required dimensions.")
+                dimensions = {}
+                if size == "custom":
+                    try:
+                        dimensions = {
+                            name: float(parameters[name][0]) for name in ("width_mm", "height_mm")
+                        }
+                    except ValueError as exc:
+                        raise InputError(
+                            "Custom dimensions must be numbers in millimeters."
+                        ) from exc
+                format = parameters.get("format", ["jpeg"])[0]
+                body = export_photo(data, size, format=format, **dimensions)
+                extension = "jpg" if format == "jpeg" else "png"
+                self._send(
+                    HTTPStatus.OK, body, f"image/{format}",
+                    download_name=f"trueme-{size}.{extension}",
+                )
+            else:
+                self._json(HTTPStatus.OK, routes[self.path](data))
         except TrueMeError as exc:
             status = ERROR_STATUS.get(type(exc), HTTPStatus.INTERNAL_SERVER_ERROR)
             self._error(status, type(exc).__name__, str(exc))
@@ -203,10 +236,15 @@ class Handler(BaseHTTPRequestHandler):
     def _error(self, status: HTTPStatus, kind: str, message: str) -> None:
         self._json(status, {"error": {"type": kind, "message": message}})
 
-    def _send(self, status: HTTPStatus, body: bytes, content_type: str) -> None:
+    def _send(
+        self, status: HTTPStatus, body: bytes, content_type: str,
+        *, download_name: str | None = None,
+    ) -> None:
         self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
+        if download_name is not None:
+            self.send_header("Content-Disposition", f'attachment; filename="{download_name}"')
         for name, value in SECURITY_HEADERS.items():
             self.send_header(name, value)
         self.end_headers()

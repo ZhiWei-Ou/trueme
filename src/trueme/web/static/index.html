@@ -7,61 +7,136 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/style.css">
   <script src="/app.js" defer></script>
+  <script src="/photo-export.js" defer></script>
 </head>
 <body>
+  <svg class="ink-intro" viewBox="0 0 1000 700" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="ink-edge" x="0" y="0" width="1000" height="700" filterUnits="userSpaceOnUse">
+        <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="8" result="grain" />
+        <feDisplacementMap in="SourceGraphic" in2="grain" scale="70" xChannelSelector="R" yChannelSelector="G" />
+        <feGaussianBlur stdDeviation="2" />
+      </filter>
+      <mask id="ink-opening" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="700">
+        <rect width="1000" height="700" fill="white" />
+        <g fill="black" filter="url(#ink-edge)">
+          <circle class="ink-bloom" cx="470" cy="330" r="780" />
+          <circle class="ink-bloom ink-branch" cx="610" cy="280" r="520" />
+          <circle class="ink-bloom ink-pool" cx="370" cy="450" r="560" />
+        </g>
+      </mask>
+    </defs>
+    <rect width="1000" height="700" fill="#30372f" mask="url(#ink-opening)" />
+  </svg>
   <header>
-    <h1>TrueMe Live</h1>
-    <p>Compare your camera with one reference photo, locally on this computer.</p>
+    <h1>TrueMe</h1>
+    <p class="tagline">A moment, reflected.</p>
   </header>
 
   <main>
-    <section class="panel camera">
+    <section class="panel camera" aria-labelledby="camera-heading">
+      <h2 id="camera-heading">Camera</h2>
       <div class="stage">
         <video id="video" autoplay playsinline muted></video>
         <canvas id="overlay"></canvas>
-        <p id="camera-hint" class="hint">Camera is off.</p>
+        <p id="camera-hint" class="hint">Waiting for camera access…</p>
       </div>
-      <div class="actions">
-        <button id="camera-toggle" type="button">Start camera</button>
-        <span id="camera-status" class="muted"></span>
-      </div>
+      <p id="camera-status" class="muted" role="status"></p>
     </section>
 
-    <section class="panel side">
-      <h2>Reference</h2>
-      <div class="reference">
-        <img id="reference-preview" alt="Reference photo preview" hidden>
-        <p id="reference-empty" class="muted">No reference yet.</p>
-      </div>
-      <div class="actions">
-        <label class="button">
-          Choose photo
-          <input id="reference-input" type="file" accept="image/jpeg,image/png,image/webp" hidden>
-        </label>
-        <button id="reference-clear" type="button" class="secondary" disabled>Clear</button>
-      </div>
-      <p id="reference-status" class="muted"></p>
-
-      <h2>Similarity</h2>
-      <p id="score" class="score">—</p>
-      <div class="scale" aria-hidden="true">
-        <div class="track">
-          <span class="zone below"></span><span class="zone meets"></span><span class="zone comfortable"></span>
-          <span id="marker" class="marker" hidden></span>
+    <section class="panel side" aria-labelledby="reference-heading">
+      <h2 id="reference-heading">Reference</h2>
+      <div class="reference-row">
+        <div class="reference">
+          <img id="reference-preview" alt="Reference photo preview" hidden>
+          <span id="reference-empty" class="placeholder"><span class="sr-only">No photo yet</span></span>
         </div>
-        <div class="ticks"><span class="tick-reference">0.363</span><span class="tick-comfort">0.5</span></div>
+        <div class="reference-actions">
+          <label class="button">
+            Choose photo
+            <input id="reference-input" type="file" accept="image/jpeg,image/png,image/webp" class="file-input" aria-label="Choose reference photo">
+          </label>
+          <div class="links">
+            <button id="photo-export" type="button" class="secondary" disabled>Export</button>
+            <button id="reference-clear" type="button" class="secondary" disabled>Clear</button>
+          </div>
+        </div>
       </div>
-      <p id="verdict" class="verdict"></p>
-      <ul id="warnings" class="warnings"></ul>
-      <p class="notice">Cosine similarity under SFace, not a confidence percentage, identity
-        verdict, or prediction of door-access or ID-check acceptance. 0.363 is the published
-        SFace/LFW reference; 0.5 is an informal rule of thumb.</p>
+      <p id="reference-status" class="muted" role="status"></p>
+
+      <section class="similarity" aria-labelledby="similarity-heading">
+        <h2 id="similarity-heading">Similarity</h2>
+        <p id="score" class="score idle">—</p>
+        <div class="scale" aria-hidden="true">
+          <div class="track">
+            <span class="zone below"></span><span class="zone meets"></span><span class="zone comfortable"></span>
+            <span id="marker" class="marker" hidden></span>
+          </div>
+          <div class="ticks"><span class="tick-reference">0.363</span><span class="tick-comfort">0.5</span></div>
+        </div>
+        <p id="verdict" class="verdict"></p>
+        <ul id="warnings" class="warnings"></ul>
+        <details>
+          <summary>Model similarity, not an identity verdict</summary>
+          <p class="notice">Cosine similarity under SFace, not a confidence percentage or a
+            prediction of door-access or ID-check acceptance. 0.363 is the published
+            SFace/LFW reference; 0.5 is an informal rule of thumb.</p>
+        </details>
+      </section>
     </section>
   </main>
 
+  <dialog id="photo-dialog" aria-labelledby="photo-heading">
+    <form method="dialog" class="photo-dialog-header">
+      <h2 id="photo-heading">Export reference photo</h2>
+      <button type="submit" class="secondary" aria-label="Close photo export">Close</button>
+    </form>
+    <div class="photo-editor">
+      <div class="photo-preview"><canvas id="photo-crop" aria-label="Cropped photo preview"></canvas></div>
+      <div class="photo-controls">
+        <label for="photo-size">Photo size</label>
+        <select id="photo-size">
+          <optgroup label="Portrait sizes">
+            <option value="small-one-inch">Small 1 inch · 22 × 32 mm</option>
+            <option value="one-inch" selected>1 inch · 25 × 35 mm</option>
+            <option value="large-one-inch">Large 1 inch · 33 × 48 mm</option>
+            <option value="small-two-inch">Small 2 inch · 35 × 45 mm</option>
+            <option value="two-inch">2 inch · 35 × 49 mm</option>
+            <option value="large-two-inch">Large 2 inch · 35 × 53 mm</option>
+          </optgroup>
+          <optgroup label="Photo prints">
+            <option value="five-inch">5 inch · 88.9 × 127 mm</option>
+            <option value="six-inch">6 inch · 101.6 × 152.4 mm</option>
+            <option value="seven-inch">7 inch · 127 × 177.8 mm</option>
+            <option value="eight-inch">8 inch · 152.4 × 203.2 mm</option>
+          </optgroup>
+          <option value="custom">Custom dimensions</option>
+        </select>
+        <div id="photo-custom-size" class="photo-custom-size" hidden>
+          <label>Width (mm)<input id="photo-width" type="number" min="10" max="300" step="0.1" value="25"></label>
+          <label>Height (mm)<input id="photo-height" type="number" min="10" max="300" step="0.1" value="35"></label>
+        </div>
+        <label for="photo-format">File format</label>
+        <select id="photo-format">
+          <option value="jpeg">JPEG · white behind transparent areas</option>
+          <option value="png">PNG · preserve transparency</option>
+        </select>
+        <label for="photo-zoom">Zoom</label>
+        <input id="photo-zoom" type="range" min="1" max="3" step="0.01" value="1">
+        <label for="photo-x">Horizontal position</label>
+        <input id="photo-x" type="range" min="0" max="100" value="50">
+        <label for="photo-y">Vertical position</label>
+        <input id="photo-y" type="range" min="0" max="100" value="50">
+        <p id="photo-dimensions" class="muted"></p>
+        <p class="muted">Keep your head and shoulders in view.</p>
+        <p id="photo-export-status" role="status"></p>
+        <button id="photo-download" type="button" disabled>Download JPEG</button>
+      </div>
+    </div>
+  </dialog>
+
   <footer class="muted">
-    Frames and the reference stay in this server's memory and are never saved.
-    Stop the server with Ctrl+C to discard them.
+    <p>Processed locally · Saved only when you download · Use only your own or consented photos.</p>
   </footer>
 </body>
 </html>

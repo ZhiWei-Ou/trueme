@@ -31,6 +31,16 @@ OpenCV remains a separately licensed dependency.
 
 ## Acquire the pinned weights
 
+From the repository root, run `make download-models` with Python 3.11-3.13 and
+`curl` installed. The target reads the pinned URLs and SHA-256 values from the
+manifest, downloads into temporary files under `models/`, and publishes each
+file only after checksum verification. Matching existing weights are skipped.
+If an existing file has the wrong checksum, move or remove it before retrying;
+the target does not replace it. Failed downloads are discarded. This command
+is separate from `make setup`, which installs Python dependencies only.
+
+Alternatively, download manually:
+
 Run these explicit downloads in PowerShell from the project directory. They
 fetch model weights only and never send photographs. `models` may be replaced
 by another directory and passed with `--model-dir`.

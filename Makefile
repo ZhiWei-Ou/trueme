@@ -8,11 +8,15 @@ PYTHON ?= python3
 VENV_PYTHON := .venv/bin/python
 endif
 
-.PHONY: help setup test lint build
+.PHONY: help setup download-models run test lint build
 help:
 	@$(PYTHON) scripts/dev.py help
 setup:
 	$(PYTHON) scripts/dev.py setup --device $(DEVICE)
+download-models:
+	$(PYTHON) scripts/dev.py download-models
+run:
+	$(VENV_PYTHON) -m trueme web --model-dir models
 test:
 	$(VENV_PYTHON) -m pytest
 lint:

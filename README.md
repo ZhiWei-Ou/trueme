@@ -79,13 +79,12 @@ This creates a project-local `.venv`; no activation needed. If `python3` is not
 ### 2️⃣ Download the models
 
 ```sh
-mkdir -p models
-base=https://media.githubusercontent.com/media/opencv/opencv_zoo/48b10fa505aeb51fbd127fc60a5c660040e823b7/models
-curl -fL -o models/face_detection_yunet_2023mar.onnx "$base/face_detection_yunet/face_detection_yunet_2023mar.onnx"
-curl -fL -o models/face_recognition_sface_2021dec.onnx "$base/face_recognition_sface/face_recognition_sface_2021dec.onnx"
+make download-models
 ```
 
-The weights are not in Git; TrueMe checks their checksums before use.
+This uses `curl` to download the pinned weights into `models/` and verifies
+their SHA-256 checksums. Matching existing files are skipped; mismatched files
+are preserved with an error. The weights are not in Git.
 Sources and licenses: [model guide](docs/models.md).
 
 ### 3️⃣ Open the live page
@@ -94,11 +93,51 @@ Sources and licenses: [model guide](docs/models.md).
 .venv/bin/trueme web --model-dir models --device cpu
 ```
 
+Or run `make run` to start the page with `models/` and automatic device selection.
+This uses the project-local virtual environment on Linux, macOS, and Windows.
+
 Open <http://127.0.0.1:8765/>, choose your edited photo as the reference, and
 start the camera. Watch the score move as you turn your head. 🎯
 Press Ctrl+C to stop; the photo and frames are discarded.
 
 ## 🧰 Usage
+
+### Export a reference photo
+
+In the live page, choose a reference photo, then click **Export** beside
+**Clear**. Select a size and adjust zoom and horizontal/vertical position in the
+preview. Choose JPEG or PNG, then **Download JPEG/PNG** to save through your browser with 300 DPI
+metadata. The original photo and background are preserved; the export contains
+no camera overlay or comparison score.
+Downloads keep the original filename stem and append the selected size, for
+example `portrait-two-inch.jpg` or `portrait-50x70mm.png` for a custom size.
+PNG preserves existing transparency, shown over a checkerboard in the preview.
+JPEG fills transparent areas with white. Selecting PNG does not remove the
+background from an opaque photo.
+
+| Preset | Printed size | Pixels at 300 DPI |
+| --- | --- | --- |
+| Small 1 inch | 22 × 32 mm | 260 × 378 |
+| 1 inch | 25 × 35 mm | 295 × 413 |
+| Large 1 inch | 33 × 48 mm | 390 × 567 |
+| Small 2 inch | 35 × 45 mm | 413 × 531 |
+| 2 inch | 35 × 49 mm | 413 × 579 |
+| Large 2 inch | 35 × 53 mm | 413 × 626 |
+| 5 inch (3.5 × 5 in) | 88.9 × 127 mm | 1050 × 1500 |
+| 6 inch (4 × 6 in) | 101.6 × 152.4 mm | 1200 × 1800 |
+| 7 inch (5 × 7 in) | 127 × 177.8 mm | 1500 × 2100 |
+| 8 inch (6 × 8 in) | 152.4 × 203.2 mm | 1800 × 2400 |
+
+**Custom dimensions** accepts width and height from 10 to 300 mm, including
+landscape sizes. Output pixels are rounded from `mm / 25.4 × 300`. The print
+presets use exact inch conversions rather than rounded millimeter labels.
+
+These are common size presets, not a certification that a photo meets an
+employer's or issuing authority's requirements. Confirm the required dimensions
+and background for your use. The app keeps the source and crop in memory and
+only saves a file when you explicitly download it. The local backend must be
+running to encode the download. A reference retained by the server after a page
+reload has no source image in the browser; choose the photo again to export it.
 
 ### 🖼️ Compare two photo files
 
@@ -162,7 +201,14 @@ compliance. The CLI reports the raw score without applying any threshold.
 <summary>🧾 JSON output and exit codes</summary>
 
 `--json` prints exactly one JSON object to stdout, including errors; diagnostics
-go to stderr. Reports (schema `1.0`) contain the score, model names and hashes,
+go to stderr through Python's standard-library `logging` package. Use
+`compare --verbose` for DEBUG device diagnostics. Logs use UTC ISO 8601 timestamps
+and colored levels in terminals, for example `2026-10-29T08:30:00Z INFO Message`.
+Only the level is colored; fields are separated by a single space without padding.
+Levels use cyan for DEBUG, green for INFO, yellow for WARNING, red for ERROR,
+and bold red for CRITICAL.
+Redirected output is plain text; `NO_COLOR=1` disables terminal colors. Logs are
+not saved to files. Reports (schema `1.0`) contain the score, model names and hashes,
 device details, input basenames, and quality warnings. They never contain
 images, embeddings, or full paths. An existing report is replaced only with
 `--overwrite`, and an input image is never overwritten.
